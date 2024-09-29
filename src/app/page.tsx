@@ -23,18 +23,20 @@ export default function HomePage() {
       <Head>
         <title>Hi</title>
       </Head>
-      <section className='bg-white'>
+      <section className='bg-black'>
         <div className='layout relative flex min-h-screen flex-col items-center justify-center py-12 text-center'>
           <Logo className='w-16' />
-          <h1 className='mt-4'>Next.js + Tailwind CSS + TypeScript Starter</h1>
-          <p className='mt-2 text-sm text-gray-800'>
+          <h1 className='mt-4 text-gray-300'>
+            Next.js + Tailwind CSS + TypeScript Starter
+          </h1>
+          <p className='mt-2 text-sm text-gray-300'>
             A starter for Next.js, Tailwind CSS, and TypeScript with Absolute
-            Import, Seo, Link component, pre-configured with Husky{' '}
+            Import, Seo, Link component, pre-configured with Husky
           </p>
-          <p className='mt-2 text-sm text-gray-700'></p>
+          <p className='mt-2 text-sm text-gray-400'></p>
 
           <footer className='absolute bottom-2 text-gray-700'>
-            © {new Date().getFullYear()} By{' '}
+            © {new Date().getFullYear()} By
           </footer>
         </div>
       </section>
