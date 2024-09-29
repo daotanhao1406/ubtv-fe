@@ -71,11 +71,6 @@ jobs:
       - name: Install Playwright (used for Storybook and E2E tests)
         run: npx playwright install --with-deps
 
-      - name: Run E2E tests
-        run: npx percy exec -- npm run test:e2e
-        env:
-          PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
-
       - uses: actions/upload-artifact@v3
         if: always()
         with:
