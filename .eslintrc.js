@@ -76,6 +76,10 @@ module.exports = {
       },
     ],
     //#endregion  //*======== Import Sort ===========
+
+    //#region  //*=========== daotanhao custom eslint rules ===========
+    '@typescript-eslint/no-empty-object-type': 'off',
+    //#endregion  //*======== daotanhao custom eslint rules ===========
   },
   globals: {
     React: true,
