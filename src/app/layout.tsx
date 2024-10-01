@@ -48,7 +48,7 @@ export default function RootLayout({
 }) {
   return (
     <html>
-      <body>
+      <body className='dark'>
         <AppProvider>{children}</AppProvider>
       </body>
     </html>
