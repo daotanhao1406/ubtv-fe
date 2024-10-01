@@ -1,7 +1,7 @@
 'use client'; // Error components must be Client Components
 
+import { Siren } from 'lucide-react';
 import * as React from 'react';
-import { RiAlarmWarningFill } from 'react-icons/ri';
 
 export default function Error({
   error,
@@ -18,7 +18,7 @@ export default function Error({
     <main>
       <section className='bg-white'>
         <div className='layout flex min-h-screen flex-col items-center justify-center text-center text-black'>
-          <RiAlarmWarningFill
+          <Siren
             size={60}
             className='drop-shadow-glow animate-flicker text-red-500'
           />
