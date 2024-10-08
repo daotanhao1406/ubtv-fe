@@ -1,8 +1,9 @@
-import { NextUIProvider } from '@nextui-org/react';
-import React, { PropsWithChildren } from 'react';
+import React from 'react';
 
-const AppProvider = ({ children }: PropsWithChildren) => {
-  return <NextUIProvider>{children}</NextUIProvider>;
+import ThemeProvider from '@/providers/ThemeProvider';
+
+const AppProvider = ({ children }: { children: React.ReactNode }) => {
+  return <ThemeProvider>{children}</ThemeProvider>;
 };
 
 export default AppProvider;

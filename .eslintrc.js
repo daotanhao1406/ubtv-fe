@@ -79,6 +79,7 @@ module.exports = {
 
     //#region  //*=========== daotanhao custom eslint rules ===========
     '@typescript-eslint/no-empty-object-type': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
     //#endregion  //*======== daotanhao custom eslint rules ===========
   },
   globals: {
