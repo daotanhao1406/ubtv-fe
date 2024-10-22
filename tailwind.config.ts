@@ -1,12 +1,9 @@
-import { nextui } from '@nextui-org/react';
-import type { Config } from 'tailwindcss';
-import defaultTheme from 'tailwindcss/defaultTheme';
+import { nextui } from '@nextui-org/react'
+import type { Config } from 'tailwindcss'
+import defaultTheme from 'tailwindcss/defaultTheme'
 
 export default {
-  content: [
-    './src/**/*.{js,jsx,ts,tsx}',
-    './node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}',
-  ],
+  content: ['./src/**/*.{js,jsx,ts,tsx}', './node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       fontFamily: {
@@ -80,4 +77,4 @@ export default {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     require('tailwindcss-animate'),
   ],
-} satisfies Config;
+} satisfies Config

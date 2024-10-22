@@ -1,14 +1,14 @@
-'use client';
-import { Button } from '@nextui-org/react';
-import React from 'react';
+'use client'
+import React from 'react'
+
+import LoginForm from '@/app/(unauth)/login/login-form'
 
 const LoginPage = () => {
   return (
     <div>
-      LoginPage
-      <Button>Login2</Button>
+      <LoginForm />
     </div>
-  );
-};
+  )
+}
 
-export default LoginPage;
+export default LoginPage

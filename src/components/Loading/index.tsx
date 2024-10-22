@@ -1,4 +1,4 @@
-import '@/components/Loading/index.css';
+import '@/components/Loading/index.css'
 const Loading = () => {
   return (
     <div className='loading'>
@@ -15,6 +15,6 @@ const Loading = () => {
         <div>Loading</div>
       </div>
     </div>
-  );
-};
-export default Loading;
+  )
+}
+export default Loading

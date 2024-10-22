@@ -1,9 +1,5 @@
-'use client';
+'use client'
 
-export default function UnAuthLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return <section>{children}</section>;
+export default function UnAuthLayout({ children }: { children: React.ReactNode }) {
+  return <section>{children}</section>
 }

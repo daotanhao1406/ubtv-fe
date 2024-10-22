@@ -1,11 +1,9 @@
-'use client';
-
-import Head from 'next/head';
+'use client'
 
 const AuthLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
-      <Head>
+      {/* <Head>
         <script
           // If no token is found, redirect inmediately
           dangerouslySetInnerHTML={{
@@ -17,9 +15,9 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     else {document.documentElement.classList.add("render")}`,
           }}
         />
-      </Head>
+      </Head> */}
       <section>{children}</section>
     </>
-  );
-};
-export default AuthLayout;
+  )
+}
+export default AuthLayout
