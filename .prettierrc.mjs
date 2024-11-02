@@ -4,7 +4,7 @@ const config = {
   jsxSingleQuote: true,
   tabWidth: 2,
   semi: false,
-  printWidth: 500,
+  printWidth: 250,
 }
 
 export default config

@@ -3,9 +3,10 @@ import * as React from 'react'
 
 import '@/styles/globals.css'
 
+import SiteHeader from '@/components/layout/SiteHeader'
 import { Toaster } from '@/components/ui/toaster'
 
-import { siteConfig } from '@/constant/config'
+import { siteConfig } from '@/constant/config/site'
 import AppProvider from '@/providers/AppProvider'
 
 // !STARTERCONF Change these default meta
@@ -47,7 +48,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html>
       <body className='dark'>
-        <AppProvider>{children}</AppProvider>
+        <AppProvider>
+          <SiteHeader />
+          {children}
+        </AppProvider>
         <Toaster />
       </body>
     </html>
