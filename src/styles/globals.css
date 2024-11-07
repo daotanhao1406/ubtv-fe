@@ -59,8 +59,11 @@
 @layer base {
   * {
     @apply border-border;
+    margin: 0;
   }
+  html,
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground h-full;
+    @apply scroll-smooth;
   }
 }
