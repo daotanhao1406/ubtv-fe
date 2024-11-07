@@ -2,8 +2,8 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@nextui-org/react'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { handleErrorApi } from '@/lib/helper'
@@ -12,13 +12,16 @@ import { useToast } from '@/hooks/useToast'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 
-import authApiRequest from '@/api/auth'
+import { useAuth } from '@/providers/AuthProvider'
 import { LoginBody, LoginBodyType } from '@/schema/auth.schema'
 
 const LoginForm = () => {
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const { login } = useAuth()
+  const redirect = useRef(searchParams.get('redirect'))
   const form = useForm<LoginBodyType>({
     resolver: zodResolver(LoginBody),
     defaultValues: {
@@ -32,18 +35,22 @@ const LoginForm = () => {
     if (loading) return
     setLoading(true)
     try {
-      const result = await authApiRequest.login(values)
-
-      await authApiRequest.authToNextServer({
-        accessToken: result.payload.accessToken,
-        expiresAt: '3600',
-      })
-
+      // const result = await authApiRequest.login(values)
+      // await authApiRequest
+      //   .authToNextServer({
+      //     accessToken: result.payload.accessToken,
+      //     expiresAt: '3600',
+      //   })
+      //   .finally(() => setLoading(false))
+      // setAccessToken(result.payload.accessToken)
+      await login(values)
       toast({
         description: 'Login success',
         title: 'Login',
+        duration: 3000,
       })
-      router.push('/')
+      if (redirect?.current) router.push(redirect.current as string)
+      else router.push('/')
       router.refresh()
     } catch (error: any) {
       handleErrorApi({

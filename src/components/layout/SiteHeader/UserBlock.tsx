@@ -1,8 +1,20 @@
 'use client'
 
-import { Avatar, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from '@nextui-org/react'
+import { Avatar, Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from '@nextui-org/react'
+import { LogOut as LogOutIcon } from 'lucide-react'
+import Link from 'next/link'
+
+import { useAuth } from '@/providers/AuthProvider'
 
 export function UserBlock() {
+  const { user, logout } = useAuth()
+  const iconClasses = 'w-5 h-5'
+  if (!user)
+    return (
+      <Button className='font-semibold' color='primary'>
+        <Link href='/login'>Login</Link>
+      </Button>
+    )
   return (
     <Dropdown placement='bottom-end'>
       <DropdownTrigger>
@@ -11,7 +23,7 @@ export function UserBlock() {
       <DropdownMenu aria-label='Profile Actions' variant='flat'>
         <DropdownItem key='profile' className='h-14 gap-2'>
           <p className='font-semibold'>Signed in as</p>
-          <p className='font-semibold'>zoey@example.com</p>
+          <p className='font-semibold'>{user.email}</p>
         </DropdownItem>
         <DropdownItem key='settings'>My Settings</DropdownItem>
         <DropdownItem key='team_settings'>Team Settings</DropdownItem>
@@ -19,7 +31,7 @@ export function UserBlock() {
         <DropdownItem key='system'>System</DropdownItem>
         <DropdownItem key='configurations'>Configurations</DropdownItem>
         <DropdownItem key='help_and_feedback'>Help & Feedback</DropdownItem>
-        <DropdownItem key='logout' color='danger'>
+        <DropdownItem className='text-danger' startContent={<LogOutIcon className={iconClasses} />} key='logout' color='danger' onClick={() => logout()}>
           Log Out
         </DropdownItem>
       </DropdownMenu>
