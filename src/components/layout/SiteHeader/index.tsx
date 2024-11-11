@@ -7,7 +7,7 @@ import { UserBlock } from '@/components/layout/SiteHeader/UserBlock'
 
 export default function SiteHeader() {
   return (
-    <Navbar shouldHideOnScroll isBordered maxWidth='2xl' className='py-1'>
+    <Navbar shouldHideOnScroll isBordered maxWidth='full' className='py-1'>
       <NavbarContent justify='start' className='items-center'>
         <MainNav />
         <MobileMenu />

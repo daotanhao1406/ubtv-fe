@@ -9,9 +9,16 @@ export default {
       fontFamily: {
         primary: ['Inter', ...defaultTheme.fontFamily.sans],
       },
+      keyframes: {
+        shine: {
+          from: { backgroundPosition: '200% 0' },
+          to: { backgroundPosition: '-200% 0' },
+        },
+      },
       animation: {
         flicker: 'flicker 3s linear infinite',
         shimmer: 'shimmer 1.3s linear infinite',
+        shine: 'shine 8s ease-in-out infinite',
       },
       borderRadius: {
         lg: 'var(--radius)',
