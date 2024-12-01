@@ -45,25 +45,19 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       setUser(res.payload || null)
       setStatus(res.payload ? 'loggedIn' : undefined)
     } catch (error) {
-      // logout()
+      logout()
       handleErrorApi({ error })
     }
   }
   const login = useCallback(
     async (body: LoginBodyType) => {
-      try {
-        const result = await authApiRequest.login(body)
-        await authApiRequest.authToNextServer({
-          accessToken: result.payload.accessToken,
-          expiresAt: '1800',
-        })
-        setAccessToken(result.payload.accessToken)
-        setStatus('loggedIn')
-      } catch (error) {
-        handleErrorApi({
-          error,
-        })
-      }
+      const result = await authApiRequest.login(body)
+      await authApiRequest.authToNextServer({
+        accessToken: result.payload.accessToken,
+        expiresAt: '1800',
+      })
+      setAccessToken(result.payload.accessToken)
+      setStatus('loggedIn')
     },
     [setAccessToken],
   )
@@ -93,7 +87,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     if (accessToken) {
       fetchMe()
     }
-  }, [accessToken])
+  })
 
   return (
     <AuthContext.Provider
