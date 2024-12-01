@@ -11,9 +11,11 @@ export function UserBlock() {
   const iconClasses = 'w-5 h-5'
   if (!user)
     return (
-      <Button className='font-semibold' color='primary'>
-        <Link href='/login'>Login</Link>
-      </Button>
+      <Link href='/login'>
+        <Button className='font-semibold' color='primary'>
+          Login
+        </Button>
+      </Link>
     )
   return (
     <Dropdown placement='bottom-end'>
