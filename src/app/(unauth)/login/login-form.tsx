@@ -64,7 +64,7 @@ const LoginForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input isInvalid={usernameState.invalid} className='rounded-none' type='text' label='Username' {...field} />
+                    <Input variant={usernameState.invalid ? 'bordered' : 'flat'} isInvalid={usernameState.invalid} className='rounded-none' type='text' label='Username' {...field} />
                   </FormControl>
                 </FormItem>
               )}
@@ -76,6 +76,7 @@ const LoginForm = () => {
                 <FormItem>
                   <FormControl>
                     <Input
+                      variant={passwordState.invalid ? 'bordered' : 'flat'}
                       type={isVisible ? 'text' : 'password'}
                       label='Password'
                       isInvalid={passwordState.invalid}
