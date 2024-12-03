@@ -4,10 +4,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Button as NextButton, Divider, Input } from '@nextui-org/react'
 import { ArrowRight, Mail } from 'lucide-react'
 import { Eye, EyeOff } from 'lucide-react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import FacebookIcon from 'public/svg/facebook.svg'
 import GoogleIcon from 'public/svg/google.svg'
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { handleErrorApi } from '@/lib/helper'
@@ -24,9 +24,7 @@ const LoginForm = () => {
   const [isVisible, setIsVisible] = useState(false)
   const { toast } = useToast()
   const router = useRouter()
-  const searchParams = useSearchParams()
   const { login } = useAuth()
-  const redirect = useRef(searchParams.get('redirect'))
   const form = useForm<LoginBodyType>({
     resolver: zodResolver(LoginBody),
     defaultValues: {
@@ -47,8 +45,7 @@ const LoginForm = () => {
           title: 'Login',
           duration: 3000,
         })
-        if (redirect?.current) router.push(redirect.current as string)
-        else router.push('/')
+        router.push('/')
         router.refresh()
       })
       .catch((error) => handleErrorApi({ error }))
@@ -67,7 +64,7 @@ const LoginForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input isInvalid={usernameState.invalid} className='rounded-none' type='text' label='Username' {...field} />
+                    <Input variant={usernameState.invalid ? 'bordered' : 'flat'} isInvalid={usernameState.invalid} className='rounded-none' type='text' label='Username' {...field} />
                   </FormControl>
                 </FormItem>
               )}
@@ -79,6 +76,7 @@ const LoginForm = () => {
                 <FormItem>
                   <FormControl>
                     <Input
+                      variant={passwordState.invalid ? 'bordered' : 'flat'}
                       type={isVisible ? 'text' : 'password'}
                       label='Password'
                       isInvalid={passwordState.invalid}
