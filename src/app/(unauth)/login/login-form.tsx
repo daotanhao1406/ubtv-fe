@@ -1,7 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button as NextButton, Divider, Input } from '@nextui-org/react'
+import { Button as NextButton, Divider, Input, Spinner } from '@nextui-org/react'
 import { ArrowRight, Mail } from 'lucide-react'
 import { Eye, EyeOff } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -38,6 +38,7 @@ const LoginForm = () => {
   const toggleVisibility = () => setIsVisible(!isVisible)
   // 2. Define a submit handler.
   async function onSubmit(values: LoginBodyType) {
+    setLoading(true)
     await login(values)
       .then(() => {
         toast({
@@ -92,7 +93,7 @@ const LoginForm = () => {
               )}
             />
 
-            <NextButton isLoading={loading} color='primary' type='submit' endContent={<ArrowRight size={20} />} className='w-full h-14 rounded-sm font-bold flex justify-between'>
+            <NextButton isDisabled={loading} color='primary' type='submit' endContent={loading ? <Spinner size='sm' color='default' /> : <ArrowRight size={20} />} className='w-full h-14 rounded-sm font-bold flex justify-between'>
               Login to Your Account
             </NextButton>
           </form>

@@ -38,29 +38,6 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     serializer: (v) => v ?? '',
     deserializer: (v) => v,
   })
-
-  const fetchMe = async () => {
-    try {
-      const res = await userApiRequest.meClient()
-      setUser(res.payload || null)
-      setStatus(res.payload ? 'loggedIn' : undefined)
-    } catch (error) {
-      handleErrorApi({ error })
-    }
-  }
-  const login = useCallback(
-    async (body: LoginBodyType) => {
-      const result = await authApiRequest.login(body)
-      await authApiRequest.authToNextServer({
-        accessToken: result.payload.accessToken,
-        expiresAt: '1800',
-      })
-      setAccessToken(result.payload.accessToken)
-      setStatus('loggedIn')
-    },
-    [setAccessToken],
-  )
-
   const logout = useCallback(async () => {
     try {
       await authApiRequest.logoutFromNextClientToNextServer()
@@ -79,6 +56,28 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       setStatus('loggedOut')
     }
   }, [pathname, router, setAccessToken])
+  const fetchMe = useCallback(async () => {
+    try {
+      const res = await userApiRequest.meClient()
+      setUser(res.payload || null)
+      setStatus(res.payload ? 'loggedIn' : undefined)
+    } catch (error) {
+      logout()
+      handleErrorApi({ error })
+    }
+  }, [setUser, setStatus, logout])
+  const login = useCallback(
+    async (body: LoginBodyType) => {
+      const result = await authApiRequest.login(body)
+      await authApiRequest.authToNextServer({
+        accessToken: result.payload.accessToken,
+        expiresAt: '1800',
+      })
+      setAccessToken(result.payload.accessToken)
+      setStatus('loggedIn')
+    },
+    [setAccessToken],
+  )
 
   const register = useCallback(async () => {}, [])
 
@@ -86,7 +85,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     if (accessToken) {
       fetchMe()
     }
-  })
+  }, [accessToken, fetchMe])
 
   return (
     <AuthContext.Provider
