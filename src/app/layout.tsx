@@ -1,10 +1,14 @@
-import { Metadata } from 'next';
-import * as React from 'react';
+import { Metadata } from 'next'
+import * as React from 'react'
 
-import '@/styles/globals.css';
+import '@/styles/globals.css'
 
-import { siteConfig } from '@/constant/config';
-import AppProvider from '@/providers/AppProvider';
+import { SiteFooter } from '@/components/layout/SiteFooter'
+import SiteHeader from '@/components/layout/SiteHeader'
+import { Toaster } from '@/components/ui/toaster'
+
+import { siteConfig } from '@/constant/config/site'
+import AppProvider from '@/providers/AppProvider'
 
 // !STARTERCONF Change these default meta
 // !STARTERCONF Look at @/constant/config to change them
@@ -39,18 +43,21 @@ export const metadata: Metadata = {
     description: siteConfig.description,
     images: [`${siteConfig.url}/images/og.jpg`],
   },
-};
+}
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html>
-      <body className='dark'>
-        <AppProvider>{children}</AppProvider>
+    <html suppressHydrationWarning>
+      <body className='dark min-h-screen bg-background font-sans antialiased'>
+        <AppProvider>
+          <div className='mx-auto relative flex flex-col min-h-screen w-full min-[1800px]:max-w-[1536px]'>
+            <SiteHeader />
+            <main className='flex-1'>{children}</main>
+            <SiteFooter />
+          </div>
+        </AppProvider>
+        <Toaster />
       </body>
     </html>
-  );
+  )
 }

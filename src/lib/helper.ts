@@ -1,13 +1,17 @@
-export function getFromLocalStorage(key: string): string | null {
-  if (typeof window !== 'undefined') {
-    return window.localStorage.getItem(key);
-  }
-  return null;
-}
+import { UseFormSetError } from 'react-hook-form'
 
-export function getFromSessionStorage(key: string): string | null {
-  if (typeof sessionStorage !== 'undefined') {
-    return sessionStorage.getItem(key);
+import { EntityError } from '@/lib/http'
+import { toast } from '@/hooks/useToast'
+
+export const handleErrorApi = ({ error, setError, duration }: { error: any; setError?: UseFormSetError<any>; duration?: number }) => {
+  if (error instanceof EntityError && setError) {
+    error.payload.errors.forEach(({ field, message }) => setError(field, { type: 'server', message }))
+  } else {
+    toast({
+      title: 'Lỗi',
+      description: error?.payload?.message ?? 'Lỗi không xác định',
+      variant: 'destructive',
+      duration: duration ?? 5000,
+    })
   }
-  return null;
 }

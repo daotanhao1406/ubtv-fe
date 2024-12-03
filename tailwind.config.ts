@@ -1,20 +1,24 @@
-import { nextui } from '@nextui-org/react';
-import type { Config } from 'tailwindcss';
-import defaultTheme from 'tailwindcss/defaultTheme';
+import { nextui } from '@nextui-org/react'
+import type { Config } from 'tailwindcss'
+import defaultTheme from 'tailwindcss/defaultTheme'
 
 export default {
-  content: [
-    './src/**/*.{js,jsx,ts,tsx}',
-    './node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}',
-  ],
+  content: ['./src/**/*.{js,jsx,ts,tsx}', './node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       fontFamily: {
         primary: ['Inter', ...defaultTheme.fontFamily.sans],
       },
+      keyframes: {
+        shine: {
+          from: { backgroundPosition: '200% 0' },
+          to: { backgroundPosition: '-200% 0' },
+        },
+      },
       animation: {
         flicker: 'flicker 3s linear infinite',
         shimmer: 'shimmer 1.3s linear infinite',
+        shine: 'shine 8s ease-in-out infinite',
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -23,6 +27,7 @@ export default {
       },
       colors: {
         background: 'hsl(var(--background))',
+        footer: 'hsl(var(--footer-background))',
         foreground: 'hsl(var(--foreground))',
         card: {
           DEFAULT: 'hsl(var(--card))',
@@ -80,4 +85,4 @@ export default {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     require('tailwindcss-animate'),
   ],
-} satisfies Config;
+} satisfies Config
