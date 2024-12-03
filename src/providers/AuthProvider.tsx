@@ -45,7 +45,6 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       setUser(res.payload || null)
       setStatus(res.payload ? 'loggedIn' : undefined)
     } catch (error) {
-      logout()
       handleErrorApi({ error })
     }
   }
