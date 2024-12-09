@@ -5,13 +5,7 @@ module.exports = {
     node: true,
   },
   plugins: ['@typescript-eslint', 'simple-import-sort', 'unused-imports'],
-  extends: [
-    'eslint:recommended',
-    'next',
-    'next/core-web-vitals',
-    'plugin:@typescript-eslint/recommended',
-    'prettier',
-  ],
+  extends: ['eslint:recommended', 'next', 'next/core-web-vitals', 'plugin:@typescript-eslint/recommended', 'prettier'],
   rules: {
     'no-unused-vars': 'off',
     'no-console': 'warn',
@@ -19,10 +13,7 @@ module.exports = {
     'react/no-unescaped-entities': 'off',
 
     'react/display-name': 'off',
-    'react/jsx-curly-brace-presence': [
-      'warn',
-      { props: 'never', children: 'never' },
-    ],
+    'react/jsx-curly-brace-presence': ['warn', { props: 'never', children: 'never' }],
 
     //#region  //*=========== Unused Import ===========
     '@typescript-eslint/no-unused-vars': 'off',
@@ -59,16 +50,7 @@ module.exports = {
           // Other imports
           ['^@/'],
           // relative paths up until 3 level
-          [
-            '^\\./?$',
-            '^\\.(?!/?$)',
-            '^\\.\\./?$',
-            '^\\.\\.(?!/?$)',
-            '^\\.\\./\\.\\./?$',
-            '^\\.\\./\\.\\.(?!/?$)',
-            '^\\.\\./\\.\\./\\.\\./?$',
-            '^\\.\\./\\.\\./\\.\\.(?!/?$)',
-          ],
+          ['^\\./?$', '^\\.(?!/?$)', '^\\.\\./?$', '^\\.\\.(?!/?$)', '^\\.\\./\\.\\./?$', '^\\.\\./\\.\\.(?!/?$)', '^\\.\\./\\.\\./\\.\\./?$', '^\\.\\./\\.\\./\\.\\.(?!/?$)'],
           ['^@/types'],
           // other that didnt fit in
           ['^'],
@@ -76,9 +58,14 @@ module.exports = {
       },
     ],
     //#endregion  //*======== Import Sort ===========
+
+    //#region  //*=========== daotanhao custom eslint rules ===========
+    '@typescript-eslint/no-empty-object-type': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
+    //#endregion  //*======== daotanhao custom eslint rules ===========
   },
   globals: {
     React: true,
     JSX: true,
   },
-};
+}

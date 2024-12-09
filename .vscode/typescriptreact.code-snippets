@@ -6,9 +6,7 @@
   },
   "React.useState": {
     "prefix": "us",
-    "body": [
-      "const [${1}, set${1/(^[a-zA-Z])(.*)/${1:/upcase}${2}/}] = React.useState<$3>(${2:initial${1/(^[a-zA-Z])(.*)/${1:/upcase}${2}/}})$0",
-    ],
+    "body": ["const [${1}, set${1/(^[a-zA-Z])(.*)/${1:/upcase}${2}/}] = React.useState<$3>(${2:initial${1/(^[a-zA-Z])(.*)/${1:/upcase}${2}/}})$0"],
   },
   "React.useEffect": {
     "prefix": "uf",
@@ -16,11 +14,7 @@
   },
   "React.useReducer": {
     "prefix": "ur",
-    "body": [
-      "const [state, dispatch] = React.useReducer(${0:someReducer}, {",
-      "  ",
-      "})",
-    ],
+    "body": ["const [state, dispatch] = React.useReducer(${0:someReducer}, {", "  ", "})"],
   },
   "React.useRef": {
     "prefix": "urf",
@@ -28,32 +22,11 @@
   },
   "React Functional Component": {
     "prefix": "rc",
-    "body": [
-      "import * as React from 'react';\n",
-      "export default function ${1:${TM_FILENAME_BASE}}() {",
-      "  return (",
-      "    <div>",
-      "      $0",
-      "    </div>",
-      "  )",
-      "}",
-    ],
+    "body": ["import * as React from 'react';\n", "export default function ${1:${TM_FILENAME_BASE}}() {", "  return (", "    <div>", "      $0", "    </div>", "  )", "}"],
   },
   "React Functional Component with Props": {
     "prefix": "rcp",
-    "body": [
-      "import * as React from 'react';\n",
-      "import clsxm from '@/lib/clsxm';\n",
-      "type ${1:${TM_FILENAME_BASE}}Props= {\n",
-      "} & React.ComponentPropsWithoutRef<'div'>\n",
-      "export default function ${1:${TM_FILENAME_BASE}}({className, ...rest}: ${1:${TM_FILENAME_BASE}}Props) {",
-      "  return (",
-      "    <div className={clsxm(['', className])} {...rest}>",
-      "      $0",
-      "    </div>",
-      "  )",
-      "}",
-    ],
+    "body": ["import * as React from 'react';\n", "import clsxm from '@/lib/clsxm';\n", "type ${1:${TM_FILENAME_BASE}}Props= {\n", "} & React.ComponentPropsWithoutRef<'div'>\n", "export default function ${1:${TM_FILENAME_BASE}}({className, ...rest}: ${1:${TM_FILENAME_BASE}}Props) {", "  return (", "    <div className={clsxm(['', className])} {...rest}>", "      $0", "    </div>", "  )", "}"],
   },
   //#endregion  //*======== React ===========
 
@@ -61,20 +34,12 @@
   "Region": {
     "prefix": "reg",
     "scope": "javascript, typescript, javascriptreact, typescriptreact",
-    "body": [
-      "//#region  //*=========== ${1} ===========",
-      "${TM_SELECTED_TEXT}$0",
-      "//#endregion  //*======== ${1} ===========",
-    ],
+    "body": ["//#region  //*=========== ${1} ===========", "${TM_SELECTED_TEXT}$0", "//#endregion  //*======== ${1} ==========="],
   },
   "Region CSS": {
     "prefix": "regc",
     "scope": "css, scss",
-    "body": [
-      "/* #region  /**=========== ${1} =========== */",
-      "${TM_SELECTED_TEXT}$0",
-      "/* #endregion  /**======== ${1} =========== */",
-    ],
+    "body": ["/* #region  /**=========== ${1} =========== */", "${TM_SELECTED_TEXT}$0", "/* #endregion  /**======== ${1} =========== */"],
   },
   //#endregion  //*======== Commons ===========
 
@@ -103,49 +68,19 @@
   },
   "Next API": {
     "prefix": "napi",
-    "body": [
-      "import { NextApiRequest, NextApiResponse } from 'next';\n",
-      "export default async function handler(req: NextApiRequest, res: NextApiResponse) {",
-      "  if (req.method === 'GET') {",
-      "    res.status(200).json({ name: 'Bambang' });",
-      "  } else {",
-      "    res.status(405).json({ message: 'Method Not Allowed' });",
-      "  }",
-      "}",
-    ],
+    "body": ["import { NextApiRequest, NextApiResponse } from 'next';\n", "export default async function handler(req: NextApiRequest, res: NextApiResponse) {", "  if (req.method === 'GET') {", "    res.status(200).json({ name: 'Bambang' });", "  } else {", "    res.status(405).json({ message: 'Method Not Allowed' });", "  }", "}"],
   },
   "Get Static Props": {
     "prefix": "gsp",
-    "body": [
-      "export const getStaticProps = async (context: GetStaticPropsContext) => {",
-      "  return {",
-      "    props: {}",
-      "  };",
-      "}",
-    ],
+    "body": ["export const getStaticProps = async (context: GetStaticPropsContext) => {", "  return {", "    props: {}", "  };", "}"],
   },
   "Get Static Paths": {
     "prefix": "gspa",
-    "body": [
-      "export const getStaticPaths: GetStaticPaths = async () => {",
-      "  return {",
-      "    paths: [",
-      "      { params: { $1 }}",
-      "    ],",
-      "    fallback: ",
-      "  };",
-      "}",
-    ],
+    "body": ["export const getStaticPaths: GetStaticPaths = async () => {", "  return {", "    paths: [", "      { params: { $1 }}", "    ],", "    fallback: ", "  };", "}"],
   },
   "Get Server Side Props": {
     "prefix": "gssp",
-    "body": [
-      "export const getServerSideProps = async (context: GetServerSidePropsContext) => {",
-      "  return {",
-      "    props: {}",
-      "  };",
-      "}",
-    ],
+    "body": ["export const getServerSideProps = async (context: GetServerSidePropsContext) => {", "  return {", "    props: {}", "  };", "}"],
   },
   "Infer Get Static Props": {
     "prefix": "igsp",
@@ -186,8 +121,6 @@
 
   "Logger": {
     "prefix": "lg",
-    "body": [
-      "logger({ ${1:${CLIPBOARD}} }, '${TM_FILENAME} line ${TM_LINE_NUMBER}')",
-    ],
+    "body": ["logger({ ${1:${CLIPBOARD}} }, '${TM_FILENAME} line ${TM_LINE_NUMBER}')"],
   },
 }
