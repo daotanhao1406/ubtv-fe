@@ -25,7 +25,7 @@ const buttonVariants = cva(
         linkHover1:
           'relative after:absolute after:bg-primary after:bottom-2 after:h-[1px] after:w-full after:origin-bottom-left after:scale-x-100 hover:after:origin-bottom-right hover:after:scale-x-0 after:transition-transform after:ease-in-out after:duration-300 !px-0', //daotanhao change after:w-2/3 to after:w-full, add !px-0
         linkHover2:
-          'relative after:absolute after:bg-primary after:bottom-2 after:h-[1px] after:w-2/3 after:origin-bottom-right after:scale-x-0 hover:after:origin-bottom-left hover:after:scale-x-100 after:transition-transform after:ease-in-out after:duration-300',
+          'relative after:absolute after:bg-primary after:bottom-2 after:h-[1px] after:w-full after:origin-bottom-right after:scale-x-0 hover:after:origin-bottom-left hover:after:scale-x-100 after:transition-transform after:ease-in-out after:duration-300 !px-0', //daotanhao change after:w-2/3 to after:w-full, add !px-0
       },
       size: {
         default: 'h-10 px-4 py-2',

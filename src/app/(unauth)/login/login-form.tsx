@@ -117,7 +117,7 @@ const LoginForm = () => {
         </div>
       </div>
       <div>
-        <ShadcnButton variant='linkHover1' className='mt-10 font-semibold'>
+        <ShadcnButton onClick={() => router.push('/forgot-password')} variant='linkHover1' className='mt-10 font-semibold'>
           Forgot Password?
         </ShadcnButton>
       </div>
