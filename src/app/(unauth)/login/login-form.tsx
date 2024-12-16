@@ -4,56 +4,81 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Button as NextButton, Divider, Input, Spinner } from '@nextui-org/react'
 import { ArrowRight, Mail } from 'lucide-react'
 import { Eye, EyeOff } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import FacebookIcon from 'public/svg/facebook.svg'
 import GoogleIcon from 'public/svg/google.svg'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { handleErrorApi } from '@/lib/helper'
-import { useToast } from '@/hooks/useToast'
+import { createBrowserClient } from '@/lib/supabase/client'
+import { toast } from '@/hooks/useToast'
 
 import { Button as ShadcnButton } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 
-import { useAuth } from '@/providers/AuthProvider'
 import { LoginBody, LoginBodyType } from '@/schema/auth.schema'
 
 const LoginForm = () => {
   const [loading, setLoading] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
-  const { toast } = useToast()
+  const supabase = createBrowserClient()
   const router = useRouter()
-  const { login } = useAuth()
   const form = useForm<LoginBodyType>({
     resolver: zodResolver(LoginBody),
     defaultValues: {
-      username: '',
+      email: '',
       password: '',
     },
   })
-  const usernameState = form.getFieldState('username')
+  const usernameState = form.getFieldState('email')
   const passwordState = form.getFieldState('password')
+  const searchParams = useSearchParams()
+
+  const next = searchParams.get('next')
+
+  async function signInWithGoogle() {
+    setLoading(true)
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback${next ? `?next=${encodeURIComponent(next)}` : ''}`,
+        },
+      })
+
+      if (error) {
+        throw error
+      }
+    } catch {
+      toast({
+        title: 'Please try again.',
+        description: 'There was an error logging in with Google.',
+        variant: 'destructive',
+      })
+      setLoading(false)
+    }
+  }
 
   const toggleVisibility = () => setIsVisible(!isVisible)
-  // 2. Define a submit handler.
-  async function onSubmit(values: LoginBodyType) {
+
+  const onSubmit = async (values: LoginBodyType) => {
     setLoading(true)
-    await login(values)
-      .then(() => {
-        toast({
-          description: 'Login success',
-          title: 'Login',
-          duration: 3000,
-        })
-        router.push('/')
-        router.refresh()
-      })
-      .catch((error) => handleErrorApi({ error }))
-      .finally(() => {
-        setLoading(false)
-      })
+    const supabase = await createBrowserClient()
+    const { error } = await supabase.auth.signInWithPassword(values).finally(() => setLoading(false))
+
+    if (error) {
+      return handleErrorApi({ error })
+    }
+    toast({
+      description: 'Login success',
+      title: 'Login',
+      duration: 3000,
+    })
+    router.push('/')
+    router.refresh()
   }
+
   return (
     <div className='flex flex-col items-center w-3/4 mt-10 xl:w-1/2'>
       <div className='flex flex-col-reverse lg:flex-row items-center w-full justify-center lg:justify-between'>
@@ -61,7 +86,7 @@ const LoginForm = () => {
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4 max-w-80 flex-shrink-0 w-full' noValidate>
             <FormField
               control={form.control}
-              name='username'
+              name='email'
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -105,13 +130,13 @@ const LoginForm = () => {
           <Divider className='w-1/3' />
         </div>
         <div className='flex lg:flex flex-col space-y-4 max-w-80 flex-shrink-0 w-full'>
-          <NextButton startContent={<GoogleIcon className='w-6 mr-2' />} variant='bordered' className='font-semibold h-14 flex justify-start'>
+          <NextButton isDisabled={loading} onClick={signInWithGoogle} startContent={<GoogleIcon className='w-6 mr-2' />} variant='bordered' className='font-semibold h-14 flex justify-start'>
             Sign in with Google
           </NextButton>
-          <NextButton startContent={<FacebookIcon className='w-6 mr-2' />} variant='bordered' className='font-semibold h-14 flex justify-start'>
+          <NextButton isDisabled={loading} startContent={<FacebookIcon className='w-6 mr-2' />} variant='bordered' className='font-semibold h-14 flex justify-start'>
             Sign in with Facebook
           </NextButton>
-          <NextButton startContent={<Mail className='w-6 mr-2' />} variant='bordered' className='font-semibold h-14 flex justify-start'>
+          <NextButton isDisabled={loading} startContent={<Mail className='w-6 mr-2' />} variant='bordered' className='font-semibold h-14 flex justify-start'>
             Sign in with Email
           </NextButton>
         </div>
