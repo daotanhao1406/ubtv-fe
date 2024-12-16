@@ -10,12 +10,18 @@ const configSchemaEnv = z.object({
   NEXT_PUBLIC_SHOW_LOGGER: z.enum(['true', 'false']).optional(),
   NEXT_PUBLIC_DEV_URL: z.string(),
   NEXT_PUBLIC_API_ENDPOINT: z.string(),
+  NEXT_PUBLIC_SUPABASE_URL: z.string(),
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string(),
+  NEXT_PUBLIC_SUPABASE_JWT_SECRET: z.string(),
 })
 
 const envConfig = configSchemaEnv.safeParse({
   NEXT_PUBLIC_SHOW_LOGGER: process.env.NEXT_PUBLIC_SHOW_LOGGER,
   NEXT_PUBLIC_DEV_URL: process.env.NEXT_PUBLIC_DEV_URL,
   NEXT_PUBLIC_API_ENDPOINT: process.env.NEXT_PUBLIC_API_ENDPOINT,
+  NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  NEXT_PUBLIC_SUPABASE_JWT_SECRET: process.env.NEXT_PUBLIC_SUPABASE_JWT_SECRET,
 })
 if (!envConfig.success) {
   throw new Error('Các giá trị khai báo trong file .env không hợp lệ')
