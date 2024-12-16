@@ -1,42 +1,51 @@
-'use client'
+import { Avatar } from '@nextui-org/react'
+import { CreditCard, Keyboard, Settings, User } from 'lucide-react'
 
-import { Avatar, Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from '@nextui-org/react'
-import { LogOut as LogOutIcon } from 'lucide-react'
-import Link from 'next/link'
+import { createServerClient } from '@/lib/supabase/server'
 
-import { useAuth } from '@/providers/AuthProvider'
+import { LoginButton } from '@/components/layout/SiteHeader/LoginButton'
+import { LogoutButton } from '@/components/layout/SiteHeader/LogoutButton'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 
-export function UserBlock() {
-  const { user, logout } = useAuth()
-  const iconClasses = 'w-5 h-5'
-  if (!user)
-    return (
-      <Link href='/login'>
-        <Button className='font-semibold' color='primary'>
-          Login
-        </Button>
-      </Link>
-    )
+export async function UserBlock() {
+  const supabase = await createServerClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return <LoginButton />
   return (
-    <Dropdown placement='bottom-end'>
-      <DropdownTrigger>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
         <Avatar isBordered as='button' className='transition-transform' color='secondary' name='Jason Hughes' size='sm' src='https://i.pravatar.cc/150?u=a042581f4e29026704d' />
-      </DropdownTrigger>
-      <DropdownMenu aria-label='Profile Actions' variant='flat'>
-        <DropdownItem key='profile' className='h-14 gap-2'>
-          <p className='font-semibold'>Signed in as</p>
-          <p className='font-semibold'>{user.email}</p>
-        </DropdownItem>
-        <DropdownItem key='settings'>My Settings</DropdownItem>
-        <DropdownItem key='team_settings'>Team Settings</DropdownItem>
-        <DropdownItem key='analytics'>Analytics</DropdownItem>
-        <DropdownItem key='system'>System</DropdownItem>
-        <DropdownItem key='configurations'>Configurations</DropdownItem>
-        <DropdownItem key='help_and_feedback'>Help & Feedback</DropdownItem>
-        <DropdownItem className='text-danger' startContent={<LogOutIcon className={iconClasses} />} key='logout' color='danger' onClick={() => logout()}>
-          Log Out
-        </DropdownItem>
-      </DropdownMenu>
-    </Dropdown>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className='w-56'>
+        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <DropdownMenuItem>
+            <User />
+            <span>Profile</span>
+            <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <CreditCard />
+            <span>Billing</span>
+            <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <Settings />
+            <span>Settings</span>
+            <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <Keyboard />
+            <span>Keyboard shortcuts</span>
+            <DropdownMenuShortcut>⌘K</DropdownMenuShortcut>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <LogoutButton />
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
