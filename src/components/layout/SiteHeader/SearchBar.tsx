@@ -1,4 +1,4 @@
-import { Button, ButtonProps, Kbd } from '@nextui-org/react'
+import { Button, ButtonProps, Kbd } from '@heroui/react'
 import { Search as SearchIcon } from 'lucide-react'
 
 export default function SearchBar({ onClick }: ButtonProps) {

@@ -1,7 +1,7 @@
 'use client'
 
+import { Button as NextButton, Divider, Input, Spinner } from '@heroui/react'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button as NextButton, Divider, Input, Spinner } from '@nextui-org/react'
 import { ArrowRight, Mail } from 'lucide-react'
 import { Eye, EyeOff } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -31,7 +31,7 @@ const LoginForm = () => {
       password: '',
     },
   })
-  const usernameState = form.getFieldState('email')
+  const emailState = form.getFieldState('email')
   const passwordState = form.getFieldState('password')
   const searchParams = useSearchParams()
 
@@ -90,7 +90,7 @@ const LoginForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input variant={usernameState.invalid ? 'bordered' : 'flat'} isInvalid={usernameState.invalid} className='rounded-none' type='text' label='Username' {...field} />
+                    <Input variant={emailState.invalid ? 'bordered' : 'flat'} isInvalid={emailState.invalid} className='rounded-none' type='text' label='Email' {...field} />
                   </FormControl>
                 </FormItem>
               )}
@@ -141,11 +141,12 @@ const LoginForm = () => {
           </NextButton>
         </div>
       </div>
-      <div>
-        <ShadcnButton onClick={() => router.push('/forgot-password')} variant='linkHover1' className='mt-10 font-semibold'>
-          Forgot Password?
-        </ShadcnButton>
-      </div>
+      <ShadcnButton onClick={() => router.push('/signup')} variant='linkHover1' className='font-semibold mt-10'>
+        Don't have an account? Create one here
+      </ShadcnButton>
+      <ShadcnButton onClick={() => router.push('/forgot-password')} variant='linkHover1' className='font-semibold'>
+        Forgot Password?
+      </ShadcnButton>
     </div>
   )
 }

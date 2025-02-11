@@ -4,7 +4,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import envVariables from '@/lib/env'
 import { getUserRole } from '@/lib/getUserRole'
 
-const protectedRoutes = ['/profile', '/']
+const protectedRoutes = ['/profile']
 const publicRoutes = ['/login', '/signup', '/forgot-password']
 
 export async function updateSession(request: NextRequest) {

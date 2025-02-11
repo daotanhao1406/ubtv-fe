@@ -1,4 +1,4 @@
-import { Navbar, NavbarContent } from '@nextui-org/react'
+import { Navbar, NavbarContent } from '@heroui/react'
 
 import { CommandMenu } from '@/components/layout/SiteHeader/CommandMenu'
 import { MainNav } from '@/components/layout/SiteHeader/MainNav'

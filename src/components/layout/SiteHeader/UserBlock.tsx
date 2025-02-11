@@ -1,4 +1,4 @@
-import { Avatar } from '@nextui-org/react'
+import { Avatar } from '@heroui/react'
 import { CreditCard, Keyboard, Settings, User } from 'lucide-react'
 
 import { createServerClient } from '@/lib/supabase/server'

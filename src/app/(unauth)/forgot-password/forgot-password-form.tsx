@@ -1,7 +1,7 @@
 'use client'
 
+import { Button as NextButton, Input } from '@heroui/react'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button as NextButton, Input } from '@nextui-org/react'
 import { ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'

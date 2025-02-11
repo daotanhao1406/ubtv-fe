@@ -1,4 +1,4 @@
-import { Spacer } from '@nextui-org/react'
+import { Spacer } from '@heroui/react'
 import { Facebook, Linkedin, Twitter } from 'lucide-react'
 
 import { Button as ShadcnButton } from '@/components/ui/button'
