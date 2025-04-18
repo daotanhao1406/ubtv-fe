@@ -1,13 +1,11 @@
 'use client'
 
-import { Button, Input, Spinner } from '@heroui/react'
+import { addToast, Button, Input, Spinner } from '@heroui/react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Eye, EyeOff } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-
-import { toast } from '@/hooks/useToast'
 
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 
@@ -48,21 +46,11 @@ const SignUpForm = () => {
 
   const onSubmit = async () => {
     setLoading(true)
-    // const { error } = await supabase.auth
-    //   .signInWithPassword({
-    //     email: values.email,
-    //     password: values.password,
-    //     name: values.name,
-    //   })
-    //   .finally(() => setLoading(false))
-
-    // if (error) {
-    //   return handleErrorApi({ error })
-    // }
-    toast({
-      description: 'SignUp success',
-      title: 'SignUp',
-      duration: 3000,
+    addToast({
+      title: 'Sign up',
+      description: 'Sign up successfully!',
+      timeout: 3000,
+      shouldShowTimeoutProgress: true,
     })
     router.push('/')
     router.refresh()

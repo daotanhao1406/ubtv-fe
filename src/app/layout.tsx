@@ -5,7 +5,6 @@ import '@/styles/globals.css'
 
 import { SiteFooter } from '@/components/layout/SiteFooter'
 import SiteHeader from '@/components/layout/SiteHeader'
-import { Toaster } from '@/components/ui/toaster'
 
 import { siteConfig } from '@/constant/config/site'
 import AppProvider from '@/providers/AppProvider'
@@ -56,7 +55,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <SiteFooter />
           </div>
         </AppProvider>
-        <Toaster />
       </body>
     </html>
   )

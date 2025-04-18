@@ -1,18 +1,11 @@
 import { Avatar } from '@heroui/react'
 import { CreditCard, Keyboard, Settings, User } from 'lucide-react'
 
-import { createServerClient } from '@/lib/supabase/server'
-
-import { LoginButton } from '@/components/layout/SiteHeader/LoginButton'
 import { LogoutButton } from '@/components/layout/SiteHeader/LogoutButton'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 
 export async function UserBlock() {
-  const supabase = await createServerClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return <LoginButton />
+  // if () return <LoginButton />
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
