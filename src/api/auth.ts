@@ -1,12 +1,12 @@
 import http from '@/lib/http'
 
-import { LoginBodyType, LoginResType, RegisterBodyType, RegisterResType, SlideSessionResType } from '@/schema/auth.schema'
+import { LoginBodyType, LoginResType, SignUpBodyType, SignUpResType, SlideSessionResType } from '@/schema/auth.schema'
 import { MessageResType } from '@/schema/common.schema'
 
 const authApiRequest = {
   login: (body: LoginBodyType) => http.post<LoginResType>('/auth/login', body),
 
-  register: (body: RegisterBodyType) => http.post<RegisterResType>('/auth/register', body),
+  register: (body: SignUpBodyType) => http.post<SignUpResType>('/auth/register', body),
 
   refreshToken: (body: { refreshToken: string }) => http.post<LoginResType>('/auth/refresh', body),
 

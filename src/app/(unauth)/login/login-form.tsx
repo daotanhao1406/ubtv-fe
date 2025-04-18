@@ -1,18 +1,14 @@
 'use client'
 
+import { addToast, Button as NextButton, Divider, Input, Spinner } from '@heroui/react'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button as NextButton, Divider, Input, Spinner } from '@nextui-org/react'
 import { ArrowRight, Mail } from 'lucide-react'
 import { Eye, EyeOff } from 'lucide-react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import FacebookIcon from 'public/svg/facebook.svg'
 import GoogleIcon from 'public/svg/google.svg'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-
-import { handleErrorApi } from '@/lib/helper'
-import { createBrowserClient } from '@/lib/supabase/client'
-import { toast } from '@/hooks/useToast'
 
 import { Button as ShadcnButton } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
@@ -22,7 +18,6 @@ import { LoginBody, LoginBodyType } from '@/schema/auth.schema'
 const LoginForm = () => {
   const [loading, setLoading] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
-  const supabase = createBrowserClient()
   const router = useRouter()
   const form = useForm<LoginBodyType>({
     resolver: zodResolver(LoginBody),
@@ -31,49 +26,20 @@ const LoginForm = () => {
       password: '',
     },
   })
-  const usernameState = form.getFieldState('email')
+  const emailState = form.getFieldState('email')
   const passwordState = form.getFieldState('password')
-  const searchParams = useSearchParams()
 
-  const next = searchParams.get('next')
-
-  async function signInWithGoogle() {
-    setLoading(true)
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback${next ? `?next=${encodeURIComponent(next)}` : ''}`,
-        },
-      })
-
-      if (error) {
-        throw error
-      }
-    } catch {
-      toast({
-        title: 'Please try again.',
-        description: 'There was an error logging in with Google.',
-        variant: 'destructive',
-      })
-      setLoading(false)
-    }
-  }
+  async function signInWithGoogle() {}
 
   const toggleVisibility = () => setIsVisible(!isVisible)
 
-  const onSubmit = async (values: LoginBodyType) => {
+  const onSubmit = async () => {
     setLoading(true)
-    const supabase = await createBrowserClient()
-    const { error } = await supabase.auth.signInWithPassword(values).finally(() => setLoading(false))
-
-    if (error) {
-      return handleErrorApi({ error })
-    }
-    toast({
-      description: 'Login success',
+    addToast({
       title: 'Login',
-      duration: 3000,
+      description: 'Login successfully!',
+      timeout: 3000,
+      shouldShowTimeoutProgress: true,
     })
     router.push('/')
     router.refresh()
@@ -90,7 +56,7 @@ const LoginForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input variant={usernameState.invalid ? 'bordered' : 'flat'} isInvalid={usernameState.invalid} className='rounded-none' type='text' label='Username' {...field} />
+                    <Input variant={emailState.invalid ? 'bordered' : 'flat'} isInvalid={emailState.invalid} className='rounded-none' type='text' label='Email' {...field} />
                   </FormControl>
                 </FormItem>
               )}
@@ -141,11 +107,12 @@ const LoginForm = () => {
           </NextButton>
         </div>
       </div>
-      <div>
-        <ShadcnButton onClick={() => router.push('/forgot-password')} variant='linkHover1' className='mt-10 font-semibold'>
-          Forgot Password?
-        </ShadcnButton>
-      </div>
+      <ShadcnButton onClick={() => router.push('/signup')} variant='linkHover1' className='font-semibold mt-10'>
+        Don't have an account? Create one here
+      </ShadcnButton>
+      <ShadcnButton onClick={() => router.push('/forgot-password')} variant='linkHover1' className='font-semibold'>
+        Forgot Password?
+      </ShadcnButton>
     </div>
   )
 }
