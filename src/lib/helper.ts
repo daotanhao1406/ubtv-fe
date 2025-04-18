@@ -1,17 +1,18 @@
+import { addToast } from '@heroui/react'
 import { UseFormSetError } from 'react-hook-form'
 
 import { EntityError } from '@/lib/http'
-import { toast } from '@/hooks/useToast'
 
 export const handleErrorApi = ({ error, setError, duration }: { error: Error; setError?: UseFormSetError<any>; duration?: number }) => {
   if (error instanceof EntityError && setError) {
     error.payload.errors.forEach(({ field, message }) => setError(field, { type: 'server', message }))
   } else {
-    toast({
-      title: 'Lỗi',
-      description: error?.message ?? 'Lỗi không xác định',
-      variant: 'destructive',
-      duration: duration ?? 5000,
+    addToast({
+      title: 'Error',
+      description: error?.message ?? 'Undefined error!',
+      timeout: duration ?? 5000,
+      shouldShowTimeoutProgress: true,
+      color: 'danger',
     })
   }
 }
