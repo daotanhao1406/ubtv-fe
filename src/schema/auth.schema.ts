@@ -30,7 +30,7 @@ export type SignUpResType = z.TypeOf<typeof SignUpRes>
 
 export const LoginBody = z
   .object({
-    email: z.string().min(2).max(100),
+    username: z.string().min(2).max(100),
     password: z.string().min(6).max(100),
   })
   .strict()
@@ -40,6 +40,16 @@ export type LoginBodyType = z.TypeOf<typeof LoginBody>
 export const LoginRes = SignUpRes
 
 export type LoginResType = z.TypeOf<typeof LoginRes>
+
+// create Forgot password body, forgot password type
+export const ForgotPasswordBody = z
+  .object({
+    email: z.string().email(),
+  })
+  .strict()
+
+export type ForgotPasswordBodyType = z.TypeOf<typeof ForgotPasswordBody>
+
 export const SlideSessionBody = z.object({}).strict()
 
 export type SlideSessionBodyType = z.TypeOf<typeof SlideSessionBody>
