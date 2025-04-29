@@ -9,30 +9,31 @@ import { useForm } from 'react-hook-form'
 import { Button as ShadcnButton } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 
-import { LoginBody, LoginBodyType } from '@/schema/auth.schema'
+import { ForgotPasswordBody, ForgotPasswordBodyType } from '@/schema/auth.schema'
 
 const ForgotPasswordForm = () => {
   const router = useRouter()
-  const form = useForm<LoginBodyType>({
-    resolver: zodResolver(LoginBody),
+  const form = useForm<ForgotPasswordBodyType>({
+    resolver: zodResolver(ForgotPasswordBody),
     defaultValues: {
       email: '',
-      password: '',
     },
   })
-  const usernameState = form.getFieldState('email')
+  const emailState = form.getFieldState('email')
+
+  const onSubmit = async () => {}
 
   return (
     <div className='flex flex-col items-center w-3/4 mt-6'>
       <Form {...form}>
-        <form className='space-y-6 max-w-md flex-shrink-0 w-full' noValidate>
+        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6 max-w-md flex-shrink-0 w-full' noValidate>
           <FormField
             control={form.control}
             name='email'
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input variant={usernameState.invalid ? 'bordered' : 'flat'} isInvalid={usernameState.invalid} className='rounded-none' type='text' label='Enter your email' {...field} />
+                  <Input variant={emailState.invalid ? 'bordered' : 'flat'} isInvalid={emailState.invalid} className='rounded-none' type='text' label='Enter your email' {...field} />
                 </FormControl>
               </FormItem>
             )}
