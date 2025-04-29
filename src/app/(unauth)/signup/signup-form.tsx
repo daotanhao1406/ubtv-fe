@@ -35,15 +35,8 @@ const SignUpForm = () => {
   if (password.length < 6) {
     passwordErrors.push('Password must be 6 characters or more.')
   }
-  if ((password.match(/[A-Z]/g) || []).length < 1) {
-    passwordErrors.push('Password must include at least 1 upper case letter')
-  }
-  if ((password.match(/[^a-z0-9]/gi) || []).length < 1) {
-    passwordErrors.push('Password must include at least 1 symbol.')
-  }
   const toggleVisibility = () => setIsVisible(!isVisible)
   const toggleConfirmVisibility = () => setIsConfirmVisible(!isConfirmVisible)
-
   const onSubmit = async () => {
     setLoading(true)
     addToast({
