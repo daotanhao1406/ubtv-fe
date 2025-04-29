@@ -1,11 +1,16 @@
+'use client'
 import { Avatar } from '@heroui/react'
 import { CreditCard, Keyboard, Settings, User } from 'lucide-react'
 
+import { LoginButton } from '@/components/layout/SiteHeader/LoginButton'
 import { LogoutButton } from '@/components/layout/SiteHeader/LogoutButton'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 
-export async function UserBlock() {
-  // if () return <LoginButton />
+import { useAuth } from '@/providers/AuthProvider'
+
+export function UserBlock() {
+  const { user } = useAuth()
+  if (!user) return <LoginButton />
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

@@ -10,39 +10,51 @@ import GoogleIcon from 'public/svg/google.svg'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
+import { handleErrorApi } from '@/lib/helper'
+
 import { Button as ShadcnButton } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 
+import { useAuth } from '@/providers/AuthProvider'
 import { LoginBody, LoginBodyType } from '@/schema/auth.schema'
 
 const LoginForm = () => {
   const [loading, setLoading] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
+  const { login } = useAuth()
   const router = useRouter()
   const form = useForm<LoginBodyType>({
     resolver: zodResolver(LoginBody),
     defaultValues: {
-      email: '',
+      username: '',
       password: '',
     },
   })
-  const emailState = form.getFieldState('email')
+  const usernameState = form.getFieldState('username')
   const passwordState = form.getFieldState('password')
 
   async function signInWithGoogle() {}
 
   const toggleVisibility = () => setIsVisible(!isVisible)
 
-  const onSubmit = async () => {
+  const onSubmit = async (values: LoginBodyType) => {
     setLoading(true)
-    addToast({
-      title: 'Login',
-      description: 'Login successfully!',
-      timeout: 3000,
-      shouldShowTimeoutProgress: true,
-    })
-    router.push('/')
-    router.refresh()
+    await login(values)
+      .then(() => {
+        addToast({
+          title: 'Login',
+          description: 'Login successfully!',
+          timeout: 3000,
+          shouldShowTimeoutProgress: true,
+          color: 'success',
+        })
+        router.push('/')
+        router.refresh()
+      })
+      .catch((error) => handleErrorApi({ error }))
+      .finally(() => {
+        setLoading(false)
+      })
   }
 
   return (
@@ -52,11 +64,11 @@ const LoginForm = () => {
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4 max-w-80 flex-shrink-0 w-full' noValidate>
             <FormField
               control={form.control}
-              name='email'
+              name='username'
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input variant={emailState.invalid ? 'bordered' : 'flat'} isInvalid={emailState.invalid} className='rounded-none' type='text' label='Email' {...field} />
+                    <Input variant={usernameState.invalid ? 'bordered' : 'flat'} isInvalid={usernameState.invalid} className='rounded-none' type='text' label='Username' {...field} />
                   </FormControl>
                 </FormItem>
               )}

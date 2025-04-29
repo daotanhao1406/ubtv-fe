@@ -1,20 +1,16 @@
 'use client'
 
 import { LogOut } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
 
-export function LogoutButton() {
-  const router = useRouter()
+import { useAuth } from '@/providers/AuthProvider'
 
-  async function handleLogout() {
-    router.push('/login')
-    router.refresh()
-  }
+export function LogoutButton() {
+  const { logout } = useAuth()
 
   return (
-    <DropdownMenuItem onClick={handleLogout}>
+    <DropdownMenuItem onClick={logout}>
       <LogOut />
       <span>Log out</span>
     </DropdownMenuItem>
