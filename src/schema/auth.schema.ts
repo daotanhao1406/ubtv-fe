@@ -4,11 +4,8 @@ export const SignUpBody = z
   .object({
     name: z.string().trim().min(2, { message: 'Full Name must be at least 2 characters' }).max(256),
     email: z.string().email(),
-    password: z
-      .string()
-      .min(6, { message: 'Password must be at least 6 characters' })
-      .max(100)
-      .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/),
+    password: z.string().min(6, { message: 'Password must be at least 6 characters' }).max(100),
+    // .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/),
     confirmPassword: z.string().min(6, { message: 'Password must be at least 6 characters' }).max(100),
   })
   .strict()
