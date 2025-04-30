@@ -1,6 +1,6 @@
 'use client'
 
-import { addToast, Button as NextButton, Divider, Input, Spinner } from '@heroui/react'
+import { addToast, Button as HeroButton, Divider, Input, Spinner } from '@heroui/react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowRight, Mail } from 'lucide-react'
 import { Eye, EyeOff } from 'lucide-react'
@@ -96,9 +96,9 @@ const LoginForm = () => {
               )}
             />
 
-            <NextButton isDisabled={loading} color='primary' type='submit' endContent={loading ? <Spinner size='sm' color='default' /> : <ArrowRight size={20} />} className='w-full h-14 rounded-sm font-bold flex justify-between'>
+            <HeroButton isDisabled={loading} color='primary' type='submit' endContent={loading ? <Spinner size='sm' color='default' /> : <ArrowRight size={20} />} className='w-full h-14 rounded-sm font-bold flex justify-between'>
               Login to Your Account
-            </NextButton>
+            </HeroButton>
           </form>
         </Form>
         <div className='hidden lg:block'>/</div>
@@ -108,15 +108,15 @@ const LoginForm = () => {
           <Divider className='w-1/3' />
         </div>
         <div className='flex lg:flex flex-col space-y-4 max-w-80 flex-shrink-0 w-full'>
-          <NextButton isDisabled={loading} onClick={signInWithGoogle} startContent={<GoogleIcon className='w-6 mr-2' />} variant='bordered' className='font-semibold h-14 flex justify-start'>
+          <HeroButton isDisabled={loading} onClick={signInWithGoogle} startContent={<GoogleIcon className='w-6 mr-2' />} variant='bordered' className='font-semibold h-14 flex justify-start'>
             Sign in with Google
-          </NextButton>
-          <NextButton isDisabled={loading} startContent={<FacebookIcon className='w-6 mr-2' />} variant='bordered' className='font-semibold h-14 flex justify-start'>
+          </HeroButton>
+          <HeroButton isDisabled={loading} startContent={<FacebookIcon className='w-6 mr-2' />} variant='bordered' className='font-semibold h-14 flex justify-start'>
             Sign in with Facebook
-          </NextButton>
-          <NextButton isDisabled={loading} startContent={<Mail className='w-6 mr-2' />} variant='bordered' className='font-semibold h-14 flex justify-start'>
+          </HeroButton>
+          <HeroButton isDisabled={loading} startContent={<Mail className='w-6 mr-2' />} variant='bordered' className='font-semibold h-14 flex justify-start'>
             Sign in with Email
-          </NextButton>
+          </HeroButton>
         </div>
       </div>
       <ShadcnButton onClick={() => router.push('/signup')} variant='linkHover1' className='font-semibold mt-10'>

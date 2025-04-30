@@ -1,6 +1,6 @@
 'use client'
 
-import { Button as NextButton, Input } from '@heroui/react'
+import { Button as HeroButton, Input } from '@heroui/react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -33,14 +33,14 @@ const ForgotPasswordForm = () => {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input variant={emailState.invalid ? 'bordered' : 'flat'} isInvalid={emailState.invalid} className='rounded-none' type='text' label='Enter your email' {...field} />
+                  <Input errorMessage='Please enter a valid email' variant={emailState.invalid ? 'bordered' : 'flat'} isInvalid={emailState.invalid} className='rounded-none' type='text' label='Enter your email' {...field} />
                 </FormControl>
               </FormItem>
             )}
           />
-          <NextButton color='primary' type='submit' className='w-full h-14 font-bold'>
+          <HeroButton color='primary' type='submit' className='w-full h-14 font-bold'>
             Reset Password
-          </NextButton>
+          </HeroButton>
         </form>
       </Form>
       <ShadcnButton onClick={() => router.push('/login')} variant='linkHover2' className='mt-4'>
