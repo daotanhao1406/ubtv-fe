@@ -51,7 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AppProvider>
           <div className='mx-auto relative flex flex-col min-h-screen w-full min-[1800px]:max-w-[1536px]'>
             <SiteHeader />
-            <main className='flex-1'>{children}</main>
+            {children}
             <SiteFooter />
           </div>
         </AppProvider>

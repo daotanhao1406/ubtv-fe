@@ -1,21 +1,12 @@
-import { Siren } from 'lucide-react'
 import { Metadata } from 'next'
 import * as React from 'react'
+
+import { ErrorPageTemplate } from '@/components/layout/ErrorPageTemplate'
 
 export const metadata: Metadata = {
   title: 'Not Found',
 }
 
 export default function NotFound() {
-  return (
-    <main>
-      <section className='bg-white'>
-        <div className='layout flex min-h-screen flex-col items-center justify-center text-center text-black'>
-          <Siren size={60} className='drop-shadow-glow animate-flicker text-red-500' />
-          <h1 className='mt-8 text-4xl md:text-6xl'>Page Not Found</h1>
-          <a href='/'>Back to home</a>
-        </div>
-      </section>
-    </main>
-  )
+  return <ErrorPageTemplate code='404' title='Page Not Found' description="Look like you discovered a page that doesn't exist or you don't have access to." />
 }
