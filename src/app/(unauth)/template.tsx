@@ -2,7 +2,7 @@ type UnAuthTemplateProps = {
   children: React.ReactNode
   icon?: React.ReactNode
   title?: string
-  description?: string
+  description?: React.ReactNode
 }
 const UnAuthTemplate = (props: UnAuthTemplateProps) => {
   return (
