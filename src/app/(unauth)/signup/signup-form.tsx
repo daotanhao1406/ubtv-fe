@@ -129,7 +129,7 @@ const SignUpForm = () => {
               )}
             />
             <Button isDisabled={loading} color='primary' type='submit' endContent={loading && <Spinner size='sm' color='default' />} className='w-full h-14 rounded-sm font-bold'>
-              Sign Up
+              Get started
             </Button>
             <p className='text-xs text-muted-foreground'>By proceeding, I agree to UB's Terms of Use and acknowledge that I have read the Privacy Policy.</p>
           </form>
