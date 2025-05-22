@@ -1,5 +1,5 @@
-import '@/components/Loading/index.css'
-const Loading = () => {
+import '@/components/LoadingComponent/index.css'
+const LoadingComponent = () => {
   return (
     <div className='loading'>
       <div className='preloader'>
@@ -17,4 +17,4 @@ const Loading = () => {
     </div>
   )
 }
-export default Loading
+export default LoadingComponent

@@ -2,9 +2,14 @@ import z from 'zod'
 
 export const UserRes = z
   .object({
-    id: z.string(),
-    name: z.string(),
-    email: z.string(),
+    status: z.string(),
+    message: z.string(),
+    data: z.object({
+      username: z.string(),
+      email: z.string(),
+      active: z.boolean(),
+      role: z.string(),
+    }),
   })
   .strict()
 

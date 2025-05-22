@@ -4,12 +4,12 @@ import { UpdateUserBodyType, UserResType } from '@/schema/user.schema'
 
 const userApiRequest = {
   me: (sessionToken: string) =>
-    http.get<UserResType>('auth/me', {
+    http.get<UserResType>('token', {
       headers: {
         Authorization: `Bearer ${sessionToken}`,
       },
     }),
-  meClient: () => http.get<UserResType>('auth/me'),
+  meClient: () => http.get<UserResType>('token'),
   updateMe: (body: UpdateUserBodyType) => http.put<UserResType>('account/me', body),
 }
 

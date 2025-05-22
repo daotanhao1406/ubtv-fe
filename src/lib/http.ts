@@ -10,7 +10,7 @@ type CustomOptions = Omit<RequestInit, 'method'> & {
 }
 
 const ENTITY_ERROR_STATUS = 422
-const AUTHENTICATION_ERROR_STATUS = 401
+const AUTHENTICATION_ERROR_STATUS = 408
 
 type EntityErrorPayload = {
   message: string
@@ -44,7 +44,9 @@ export class EntityError extends HttpError {
 }
 
 let clientLogoutRequest: null | Promise<any> = null
-const request = async <Response>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: string, options?: CustomOptions | undefined) => {
+let refreshTokenRequest: null | Promise<any> = null
+
+const request = async <Response>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: string, options?: CustomOptions | undefined, isRetry: boolean = false) => {
   let body: FormData | string | undefined = undefined
   if (options?.body instanceof FormData) {
     body = options.body
@@ -69,7 +71,6 @@ const request = async <Response>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url:
   // Nếu truyền baseUrl thì lấy giá trị truyền vào, truyền vào '' thì đồng nghĩa với việc chúng ta gọi API đến Next.js Server
 
   const baseUrl = options?.baseUrl === undefined ? envVariables.NEXT_PUBLIC_API_ENDPOINT : options.baseUrl
-
   const fullUrl = url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`
 
   const res = await fetch(fullUrl, {
@@ -96,44 +97,83 @@ const request = async <Response>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url:
           payload: EntityErrorPayload
         },
       )
-    } else if (res.status === AUTHENTICATION_ERROR_STATUS) {
+    } else if (res.status === AUTHENTICATION_ERROR_STATUS && !isRetry) {
       if (isBrowser) {
-        if (!clientLogoutRequest) {
-          clientLogoutRequest = fetch('/api/auth/logout', {
+        // Try to refresh token
+        if (!refreshTokenRequest) {
+          refreshTokenRequest = fetch(`${baseUrl}/auth/refresh-token`, {
             method: 'POST',
-            body: JSON.stringify({ force: true }),
             headers: {
-              ...baseHeaders,
-            } as any,
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include', // Include cookies for refresh token
           })
+
           try {
-            await clientLogoutRequest
+            const refreshRes = await refreshTokenRequest
+            const refreshData = await refreshRes.json()
+
+            if (!refreshRes.ok) {
+              throw new Error('Refresh token failed')
+            }
+
+            // Update access token
+            const {
+              data: { token },
+            } = refreshData as LoginResType
+            localStorage.setItem('accessToken', token)
+
+            // Reset refresh token request
+            refreshTokenRequest = null
+
+            // Retry original request with new token
+            return request(method, url, options, true)
           } catch (error: Error | any) {
-            throw new Error(error.message)
-          } finally {
-            localStorage.removeItem('accessToken')
-            localStorage.removeItem('accessTokenExpiresAt')
-            clientLogoutRequest = null
-            location.href = '/login'
+            // Handle refresh token failure
+            if (!clientLogoutRequest) {
+              clientLogoutRequest = fetch('/api/auth/logout', {
+                method: 'POST',
+                body: JSON.stringify({ force: true }),
+                headers: {
+                  ...baseHeaders,
+                } as any,
+              })
+
+              try {
+                await clientLogoutRequest
+              } catch (logoutError: Error | any) {
+                throw new Error(logoutError.message || error.message)
+              } finally {
+                localStorage.removeItem('accessToken')
+                localStorage.removeItem('accessTokenExpiresAt')
+                clientLogoutRequest = null
+                refreshTokenRequest = null
+                location.href = '/login'
+              }
+            }
           }
         }
       } else {
-        const accessToken = (options?.headers as any)?.Authorization.split('Bearer ')[1]
+        const accessToken = (options?.headers as any)?.Authorization?.split('Bearer ')[1]
         redirect(`/logout?accessToken=${accessToken}`)
       }
     } else {
       throw new HttpError(data)
     }
   }
-  // Đảm bảo logic dưới đây chỉ chạy ở phía client (browser)
+
   if (isBrowser) {
-    if (['auth/login', 'auth/register'].some((item) => item === normalizePath(url))) {
-      const { accessToken } = payload as LoginResType
-      localStorage.setItem('accessToken', accessToken)
+    if (['auth/login', 'auth/refresh-token'].some((item) => item === normalizePath(url))) {
+      const {
+        data: { token },
+      } = payload as LoginResType
+      localStorage.setItem('accessToken', token)
     } else if ('auth/logout' === normalizePath(url)) {
       localStorage.removeItem('accessToken')
+      localStorage.removeItem('accessTokenExpiresAt')
     }
   }
+
   return data
 }
 

@@ -1,10 +1,11 @@
 import { Metadata } from 'next'
-import * as React from 'react'
+import { Suspense } from 'react'
 
 import '@/styles/globals.css'
 
 import { SiteFooter } from '@/components/layout/SiteFooter'
 import SiteHeader from '@/components/layout/SiteHeader'
+import LoadingComponent from '@/components/LoadingComponent'
 
 import { siteConfig } from '@/constant/config/site'
 import AppProvider from '@/providers/AppProvider'
@@ -50,9 +51,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className='dark min-h-screen bg-background font-sans antialiased'>
         <AppProvider>
           <div className='mx-auto relative flex flex-col min-h-screen w-full min-[1800px]:max-w-[1536px]'>
-            <SiteHeader />
-            {children}
-            <SiteFooter />
+            <Suspense fallback={<LoadingComponent />}>
+              <SiteHeader />
+              {children}
+              <SiteFooter />
+            </Suspense>
           </div>
         </AppProvider>
       </body>
