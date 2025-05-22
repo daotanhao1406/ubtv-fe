@@ -1,41 +1,45 @@
 'use client'
 
-import { InputOtp } from '@heroui/react'
+import { addToast, InputOtp } from '@heroui/react'
 import { ArrowLeft } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { useForm } from 'react-hook-form'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useState } from 'react'
 
 import { Button as ShadcnButton } from '@/components/ui/button'
-import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
+
+import { useAuth } from '@/providers/AuthProvider'
 
 const EmailVerificationForm = () => {
   const router = useRouter()
-  const form = useForm<any>({
-    defaultValues: {
-      code: '',
-    },
-  })
-  const codeState = form.getFieldState('code')
+  const searchParams = useSearchParams()
+  const username = searchParams.get('username')
+  const { confirmOtp } = useAuth()
+  const [code, setCode] = useState('')
+  const [invalidCode, setInvalidCode] = useState<boolean>(false)
 
-  const onSubmit = async () => {}
+  const onInputOTPChange = async (value: string) => {
+    setCode(value)
+    setInvalidCode(false)
+    if (value.length === 4 && username) {
+      await confirmOtp({ otp: value, username })
+        .then(() => {
+          addToast({
+            title: 'Login',
+            description: 'Login successfully!',
+            timeout: 3000,
+            shouldShowTimeoutProgress: true,
+            color: 'success',
+          })
+          router.push('/successful-email-verification')
+          router.refresh()
+        })
+        .catch(() => setInvalidCode(true))
+    }
+  }
 
   return (
     <div className='flex flex-col items-center w-full mt-6'>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6 flex flex-col max-w-md items-center w-full' noValidate>
-          <FormField
-            control={form.control}
-            name='code'
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <InputOtp autoFocus length={4} variant='flat' isInvalid={codeState.invalid} {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        </form>
-      </Form>
+      <InputOtp autoFocus length={4} variant='flat' isInvalid={invalidCode} errorMessage='Invalid OTP code' value={code} onValueChange={onInputOTPChange} />
       <p className='text-muted-foreground mt-6'>
         Didn't receive the email?{' '}
         <ShadcnButton className='p-0' variant='link'>

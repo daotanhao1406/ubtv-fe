@@ -8,6 +8,7 @@ import { useLocalStorage } from '@/hooks'
 
 import authApiRequest from '@/api/auth'
 import userApiRequest from '@/api/user'
+import { publicRoutes } from '@/middleware'
 import { LoginBodyType, SignUpBodyType } from '@/schema/auth.schema'
 
 type AuthContextType = {
@@ -16,7 +17,7 @@ type AuthContextType = {
   login: (body: LoginBodyType) => Promise<void>
   logout: () => Promise<void>
   register: (body: SignUpBodyType) => Promise<void>
-  status: undefined | 'loggedIn' | 'loggedOut'
+  confirmOtp: (body: { otp: string; username: string }) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType)
@@ -25,7 +26,6 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   const router = useRouter()
   const pathname = usePathname()
   const [user, setUser] = useState<User | null>(null)
-  const [status, setStatus] = useState<undefined | 'loggedIn' | 'loggedOut'>()
   const [accessToken, setAccessToken] = useLocalStorage<string | undefined>('accessToken', {
     onError(error) {
       const errorValue = error as Error
@@ -38,14 +38,13 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     serializer: (v) => v ?? '',
     deserializer: (v) => v,
   })
+
   const logout = useCallback(async () => {
     try {
       await authApiRequest.logoutFromNextClientToNextServer()
       router.push('/login')
     } catch (error: any) {
-      handleErrorApi({
-        error,
-      })
+      handleErrorApi({ error })
       authApiRequest.logoutFromNextClientToNextServer(true).then(() => {
         router.push(`/login?redirectFrom=${pathname}`)
       })
@@ -53,38 +52,65 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       router.refresh()
       setAccessToken(undefined)
       setUser(null)
-      setStatus('loggedOut')
     }
   }, [pathname, router, setAccessToken])
-  const fetchMe = useCallback(async () => {
-    try {
-      const res = await userApiRequest.meClient()
-      setUser(res.payload || null)
-      setStatus(res.payload ? 'loggedIn' : undefined)
-    } catch (error: any) {
-      logout()
-      handleErrorApi({ error })
-    }
-  }, [setUser, setStatus, logout])
+
   const login = useCallback(
     async (body: LoginBodyType) => {
       const result = await authApiRequest.login(body)
       await authApiRequest.authToNextServer({
-        accessToken: result.payload.accessToken,
+        accessToken: result.payload.data.token,
         expiresAt: '1800',
       })
-      setAccessToken(result.payload.accessToken)
-      setStatus('loggedIn')
+      setAccessToken(result.payload.data.token)
+      const res = await userApiRequest.meClient()
+      setUser(res.payload.data || null)
     },
     [setAccessToken],
   )
 
-  const register = useCallback(async () => {}, [])
+  const register = async (body: SignUpBodyType) => {
+    await authApiRequest.register(body)
+  }
+
+  const confirmOtp = useCallback(
+    async (body: { otp: string; username: string }) => {
+      const result = await authApiRequest.confirmOtp(body)
+      await authApiRequest.authToNextServer({
+        accessToken: result.payload.data.token,
+        expiresAt: '1800',
+      })
+      setAccessToken(result.payload.data.token)
+    },
+    [setAccessToken],
+  )
+
+  const fetchMe = useCallback(
+    async (accessToken?: string) => {
+      if (!accessToken) {
+        if (publicRoutes.includes(pathname)) {
+          return
+        }
+        setUser(null)
+        router.push('/login')
+        return
+      }
+
+      await userApiRequest
+        .meClient()
+        .then((res) => setUser(res.payload.data || null))
+        .catch((error: any) => {
+          if (!publicRoutes.includes(pathname)) {
+            logout()
+          }
+          handleErrorApi({ error })
+        })
+    },
+    [router, logout, pathname],
+  )
 
   useEffect(() => {
-    if (accessToken) {
-      fetchMe()
-    }
+    fetchMe(accessToken)
   }, [accessToken, fetchMe])
 
   return (
@@ -92,10 +118,10 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       value={{
         user,
         setUser,
-        status,
         login,
         logout,
         register,
+        confirmOtp,
       }}
     >
       {children}

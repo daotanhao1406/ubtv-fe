@@ -8,6 +8,8 @@ const authApiRequest = {
 
   register: (body: SignUpBodyType) => http.post<SignUpResType>('/auth/register', body),
 
+  confirmOtp: (body: { otp: string; username: string }) => http.put<SignUpResType>('/auth/otp', body),
+
   refreshToken: (body: { refreshToken: string }) => http.post<LoginResType>('/auth/refresh', body),
 
   // Set access token to cookies in next server

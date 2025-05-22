@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 // 1. Specify protected and public routes
 const protectedRoutes = ['/profile', '/']
-const publicRoutes = ['/login', '/signup', '/forgot-password']
+export const publicRoutes = ['/login', '/signup', '/forgot-password', '/email-verification']
 
 export default async function middleware(request: NextRequest) {
   // 2. Check if the current route is protected or public

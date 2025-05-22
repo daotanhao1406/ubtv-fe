@@ -17,7 +17,7 @@ export function UserBlock() {
         <Avatar isBordered as='button' className='transition-transform' color='secondary' name='Jason Hughes' size='sm' src='https://i.pravatar.cc/150?u=a042581f4e29026704d' />
       </DropdownMenuTrigger>
       <DropdownMenuContent className='w-56'>
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuLabel>{user?.username}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem>

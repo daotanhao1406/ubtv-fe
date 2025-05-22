@@ -7,25 +7,29 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
+import { handleErrorApi } from '@/lib/helper'
+
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 
+import { useAuth } from '@/providers/AuthProvider'
 import { SignUpBody, SignUpBodyType } from '@/schema/auth.schema'
 
 const SignUpForm = () => {
   const [loading, setLoading] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
   const [isConfirmVisible, setIsConfirmVisible] = useState(false)
+  const { register } = useAuth()
   const router = useRouter()
   const form = useForm<SignUpBodyType>({
     resolver: zodResolver(SignUpBody),
     defaultValues: {
-      name: '',
+      username: '',
       email: '',
       password: '',
       confirmPassword: '',
     },
   })
-  const nameState = form.getFieldState('name')
+  const usernameState = form.getFieldState('username')
   const emailState = form.getFieldState('email')
   const passwordState = form.getFieldState('password')
   const confirmPasswordState = form.getFieldState('confirmPassword')
@@ -37,16 +41,26 @@ const SignUpForm = () => {
   }
   const toggleVisibility = () => setIsVisible(!isVisible)
   const toggleConfirmVisibility = () => setIsConfirmVisible(!isConfirmVisible)
-  const onSubmit = async () => {
+  const onSubmit = async (values: SignUpBodyType) => {
     setLoading(true)
-    addToast({
-      title: 'Sign up',
-      description: 'Sign up successfully!',
-      timeout: 3000,
-      shouldShowTimeoutProgress: true,
-    })
-    router.push('/')
-    router.refresh()
+    await register(values)
+      .then(() => {
+        addToast({
+          title: 'Sign Up',
+          description: 'Sign Up successfully!',
+          timeout: 3000,
+          shouldShowTimeoutProgress: true,
+          color: 'success',
+        })
+        router.push(`/email-verification?email=${values.email}&username=${values.username}`)
+        router.refresh()
+      })
+      .catch((error) => {
+        handleErrorApi({ error })
+      })
+      .finally(() => {
+        setLoading(false)
+      })
   }
 
   return (
@@ -56,11 +70,11 @@ const SignUpForm = () => {
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4 w-[440px]' noValidate>
             <FormField
               control={form.control}
-              name='name'
+              name='username'
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input errorMessage={nameState.error?.message} variant={nameState.invalid ? 'bordered' : 'flat'} isInvalid={nameState.invalid} className='rounded-none' type='text' label='Full Name' {...field} />
+                    <Input errorMessage={usernameState.error?.message} variant={usernameState.invalid ? 'bordered' : 'flat'} isInvalid={usernameState.invalid} className='rounded-none' type='text' label='Username' {...field} />
                   </FormControl>
                 </FormItem>
               )}
