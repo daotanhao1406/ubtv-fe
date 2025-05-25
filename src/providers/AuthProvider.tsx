@@ -92,7 +92,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
           return
         }
         setUser(null)
-        router.push('/login')
+        // router.push('/login')
         return
       }
 
@@ -106,7 +106,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
           handleErrorApi({ error })
         })
     },
-    [router, logout, pathname],
+    [logout, pathname],
   )
 
   useEffect(() => {

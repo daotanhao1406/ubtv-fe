@@ -58,7 +58,7 @@ const LoginForm = () => {
   }
 
   return (
-    <div className='flex flex-col items-center w-3/4 mt-10 xl:w-1/2'>
+    <div className='flex flex-col items-center w-3/4 mt-10 xl:w-1/2 2xl:w-2/5'>
       <div className='flex flex-col-reverse lg:flex-row items-center w-full justify-center lg:justify-between'>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4 max-w-80 flex-shrink-0 w-full' noValidate>
