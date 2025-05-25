@@ -3,8 +3,6 @@ import { Suspense } from 'react'
 
 import '@/styles/globals.css'
 
-import { SiteFooter } from '@/components/layout/SiteFooter'
-import SiteHeader from '@/components/layout/SiteHeader'
 import LoadingComponent from '@/components/LoadingComponent'
 
 import { siteConfig } from '@/constant/config/site'
@@ -48,14 +46,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html suppressHydrationWarning>
-      <body className='dark min-h-screen bg-background font-sans antialiased'>
+      <body className='dark min-h-screen bg-background font-sans antialiased '>
         <AppProvider>
-          <div className='mx-auto relative flex flex-col min-h-screen w-full min-[1800px]:max-w-[1536px]'>
-            <Suspense fallback={<LoadingComponent />}>
-              <SiteHeader />
-              {children}
-              <SiteFooter />
-            </Suspense>
+          <div className='mx-auto relative flex flex-col min-h-screen w-full'>
+            <Suspense fallback={<LoadingComponent />}>{children}</Suspense>
           </div>
         </AppProvider>
       </body>
