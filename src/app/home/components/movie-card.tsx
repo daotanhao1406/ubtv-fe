@@ -2,6 +2,7 @@
 
 import { Card } from '@heroui/react'
 import { Star } from 'lucide-react'
+import Image from 'next/image'
 import { useState } from 'react'
 
 export function MovieCard({ title, year, genre, imageUrl, videoUrl, rating }: any) {
@@ -19,8 +20,7 @@ export function MovieCard({ title, year, genre, imageUrl, videoUrl, rating }: an
 
       {/* Video/Image Container */}
       <div className='relative h-full w-full'>
-        {/* eslint-disable @next/next/no-img-element */}
-        <img src={imageUrl} alt={title} className='h-full w-full object-cover' />
+        <Image src={imageUrl} alt={title} fill className='h-full w-full object-cover' />
 
         {/* Video Overlay */}
         {videoUrl && isHovering && <video src={videoUrl} autoPlay muted playsInline className='absolute inset-0 h-full w-full object-cover' />}
