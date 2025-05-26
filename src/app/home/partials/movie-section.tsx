@@ -1,12 +1,10 @@
 'use client'
 
-import { motion } from 'framer-motion'
-
 import { cn } from '@/lib/utils'
 
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel'
 
-import { MovieCard } from '@/app/home/movie-card'
+import { MovieCard } from '@/app/home/components/movie-card'
 
 interface MovieSectionProps {
   title: string
@@ -18,9 +16,7 @@ export function MovieSection({ title, movies, className }: MovieSectionProps) {
   return (
     <div className={cn('py-8', className)}>
       <div className='px-4 md:px-6'>
-        <motion.h2 className='mb-6 text-2xl font-bold tracking-tight md:text-3xl' initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          {title}
-        </motion.h2>
+        <h2 className='mb-6 text-2xl font-bold tracking-tight md:text-3xl'>{title}</h2>
 
         <Carousel
           opts={{
