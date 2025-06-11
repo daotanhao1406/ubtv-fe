@@ -4,7 +4,7 @@ import SiteHeader from '@/components/layout/SiteHeader'
 import { recommendedMovies } from '@/app/home/data/movieData'
 import { FeatureHero } from '@/app/home/partials/feature-hero'
 import { MovieSection } from '@/app/home/partials/movie-section'
-export default function HomePage() {
+export default async function HomePage() {
   return (
     <>
       <SiteHeader isHome />

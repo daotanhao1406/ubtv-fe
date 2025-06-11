@@ -28,11 +28,11 @@ export function MovieCard({ title, year, genre, imageUrl, videoUrl, rating }: an
         {/* Content Overlay */}
         <div className='absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent'>
           <div className='absolute bottom-4 left-4 right-4'>
-            <h3 className='text-lg font-normal'>{title}</h3>
-            <div className='mt-1 flex items-center gap-2 text-sm text-white/70'>
-              <span>{year}</span>
-              <span>•</span>
-              <span>{genre}</span>
+            <h3 className='text-sm font-normal'>{title}</h3>
+            <div className='mt-1 flex items-center gap-2 text-xs text-white/60'>
+              <span>
+                {year}, {genre}
+              </span>
             </div>
           </div>
         </div>

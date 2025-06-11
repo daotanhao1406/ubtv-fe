@@ -1,6 +1,6 @@
 'use client'
 
-import { addToast, Button, Input, Spinner } from '@heroui/react'
+import { Button, Input, Spinner } from '@heroui/react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Eye, EyeOff } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -45,14 +45,14 @@ const SignUpForm = () => {
     setLoading(true)
     await register(values)
       .then(() => {
-        addToast({
-          title: 'Sign Up',
-          description: 'Sign Up successfully!',
-          timeout: 3000,
-          shouldShowTimeoutProgress: true,
-          color: 'success',
-        })
-        router.push(`/email-verification?email=${values.email}&username=${values.username}`)
+        // addToast({
+        //   title: 'Sign Up',
+        //   description: 'Sign Up successfully!',
+        //   timeout: 3000,
+        //   shouldShowTimeoutProgress: true,
+        //   color: 'success',
+        // })
+        router.push(`/email-verification?type=register&email=${values.email}&username=${values.username}`)
         router.refresh()
       })
       .catch((error) => {
