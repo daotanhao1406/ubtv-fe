@@ -2,7 +2,7 @@
 
 import { addToast, Button as HeroButton, Divider, Input, Spinner } from '@heroui/react'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowRight, Mail } from 'lucide-react'
+import { ArrowRight, LogIn, Mail } from 'lucide-react'
 import { Eye, EyeOff } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import FacebookIcon from 'public/svg/facebook.svg'
@@ -26,11 +26,11 @@ const LoginForm = () => {
   const form = useForm<LoginBodyType>({
     resolver: zodResolver(LoginBody),
     defaultValues: {
-      username: '',
+      email: '',
       password: '',
     },
   })
-  const usernameState = form.getFieldState('username')
+  const emailState = form.getFieldState('email')
   const passwordState = form.getFieldState('password')
 
   async function signInWithGoogle() {}
@@ -47,6 +47,7 @@ const LoginForm = () => {
           timeout: 3000,
           shouldShowTimeoutProgress: true,
           color: 'success',
+          icon: <LogIn />,
         })
         router.push('/')
         router.refresh()
@@ -64,11 +65,11 @@ const LoginForm = () => {
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4 max-w-80 flex-shrink-0 w-full' noValidate>
             <FormField
               control={form.control}
-              name='username'
+              name='email'
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input variant={usernameState.invalid ? 'bordered' : 'flat'} isInvalid={usernameState.invalid} className='rounded-none' type='text' label='Username' {...field} />
+                    <Input variant={emailState.invalid ? 'bordered' : 'flat'} isInvalid={emailState.invalid} className='rounded-none' type='text' label='Email' {...field} />
                   </FormControl>
                 </FormItem>
               )}

@@ -6,10 +6,11 @@ import { createContext, useCallback, useContext, useEffect, useState } from 'rea
 import { handleErrorApi } from '@/lib/helper'
 import { useLocalStorage } from '@/hooks'
 
+import { CustomResponseType } from '@/api'
 import authApiRequest from '@/api/auth'
 import userApiRequest from '@/api/user'
 import { publicRoutes } from '@/middleware'
-import { LoginBodyType, SignUpBodyType } from '@/schema/auth.schema'
+import { ForgotPasswordBodyType, LoginBodyType, ResetPasswordBodyType, SignUpBodyType } from '@/schema/auth.schema'
 
 type AuthContextType = {
   user?: User | null
@@ -17,7 +18,10 @@ type AuthContextType = {
   login: (body: LoginBodyType) => Promise<void>
   logout: () => Promise<void>
   register: (body: SignUpBodyType) => Promise<void>
-  confirmOtp: (body: { otp: string; username: string }) => Promise<void>
+  forgotPassword: (body: ForgotPasswordBodyType) => Promise<void>
+  resetPassword: (body: ResetPasswordBodyType) => Promise<void>
+  confirmResgisterOtp: (body: { otp: string; username: string }) => Promise<void>
+  confirmResetPasswordOtp: (body: { otp: string; email: string }) => Promise<CustomResponseType>
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType)
@@ -25,7 +29,7 @@ const AuthContext = createContext<AuthContextType>({} as AuthContextType)
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<any>(null)
   const [accessToken, setAccessToken] = useLocalStorage<string | undefined>('accessToken', {
     onError(error) {
       const errorValue = error as Error
@@ -60,7 +64,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       const result = await authApiRequest.login(body)
       await authApiRequest.authToNextServer({
         accessToken: result.payload.data.token,
-        expiresAt: '1800',
+        refreshToken: result.payload.data.refreshToken,
       })
       setAccessToken(result.payload.data.token)
       const res = await userApiRequest.meClient()
@@ -73,17 +77,27 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     await authApiRequest.register(body)
   }
 
-  const confirmOtp = useCallback(
+  const confirmResgisterOtp = useCallback(
     async (body: { otp: string; username: string }) => {
-      const result = await authApiRequest.confirmOtp(body)
+      const result = await authApiRequest.confirmResgisterOtp(body)
       await authApiRequest.authToNextServer({
         accessToken: result.payload.data.token,
-        expiresAt: '1800',
+        refreshToken: result.payload.data.refreshToken,
       })
       setAccessToken(result.payload.data.token)
     },
     [setAccessToken],
   )
+  const confirmResetPasswordOtp = async (body: { otp: string; email: string }) => {
+    return await authApiRequest.confirmResetPasswordOtp(body)
+  }
+  const forgotPassword = async (body: ForgotPasswordBodyType) => {
+    await authApiRequest.forgotPassword(body)
+  }
+
+  const resetPassword = async (body: ResetPasswordBodyType) => {
+    await authApiRequest.resetPassword(body)
+  }
 
   const fetchMe = useCallback(
     async (accessToken?: string) => {
@@ -121,7 +135,10 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
         login,
         logout,
         register,
-        confirmOtp,
+        confirmResgisterOtp,
+        confirmResetPasswordOtp,
+        forgotPassword,
+        resetPassword,
       }}
     >
       {children}

@@ -1,49 +1,33 @@
 'use client'
-import { Avatar } from '@heroui/react'
-import { CreditCard, Keyboard, Settings, User } from 'lucide-react'
+import { Avatar, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from '@heroui/react'
 
 import { LoginButton } from '@/components/layout/SiteHeader/LoginButton'
-import { LogoutButton } from '@/components/layout/SiteHeader/LogoutButton'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 
 import { useAuth } from '@/providers/AuthProvider'
 
 export function UserBlock() {
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
   if (!user) return <LoginButton />
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <Dropdown placement='bottom-end'>
+      <DropdownTrigger>
         <Avatar isBordered as='button' className='transition-transform' color='secondary' name='Jason Hughes' size='sm' src='https://i.pravatar.cc/150?u=a042581f4e29026704d' />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className='w-56'>
-        <DropdownMenuLabel>{user?.username}</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <User />
-            <span>Profile</span>
-            <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <CreditCard />
-            <span>Billing</span>
-            <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Settings />
-            <span>Settings</span>
-            <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Keyboard />
-            <span>Keyboard shortcuts</span>
-            <DropdownMenuShortcut>⌘K</DropdownMenuShortcut>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <LogoutButton />
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </DropdownTrigger>
+      <DropdownMenu aria-label='Profile Actions' variant='flat'>
+        <DropdownItem key='profile' className='h-14 gap-2'>
+          <p className='font-semibold'>Signed in as</p>
+          <p className='font-semibold'>zoey@example.com</p>
+        </DropdownItem>
+        <DropdownItem key='settings'>My Settings</DropdownItem>
+        <DropdownItem key='team_settings'>Team Settings</DropdownItem>
+        <DropdownItem key='analytics'>Analytics</DropdownItem>
+        <DropdownItem key='system'>System</DropdownItem>
+        <DropdownItem key='configurations'>Configurations</DropdownItem>
+        <DropdownItem key='help_and_feedback'>Help & Feedback</DropdownItem>
+        <DropdownItem onPress={logout} key='logout' color='danger'>
+          Log Out
+        </DropdownItem>
+      </DropdownMenu>
+    </Dropdown>
   )
 }

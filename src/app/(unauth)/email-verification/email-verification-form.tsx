@@ -13,27 +13,47 @@ const EmailVerificationForm = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
   const username = searchParams.get('username')
-  const { confirmOtp } = useAuth()
+  const email = searchParams.get('email')
+  const type = searchParams.get('type')
+  const { confirmResgisterOtp, confirmResetPasswordOtp } = useAuth()
   const [code, setCode] = useState('')
   const [invalidCode, setInvalidCode] = useState<boolean>(false)
 
   const onInputOTPChange = async (value: string) => {
     setCode(value)
     setInvalidCode(false)
-    if (value.length === 4 && username) {
-      await confirmOtp({ otp: value, username })
-        .then(() => {
-          addToast({
-            title: 'Login',
-            description: 'Login successfully!',
-            timeout: 3000,
-            shouldShowTimeoutProgress: true,
-            color: 'success',
+    if (type === 'register') {
+      if (value.length === 4 && username) {
+        await confirmResgisterOtp({ otp: value, username })
+          .then(() => {
+            addToast({
+              title: 'Sign up',
+              description: 'Sign up successfully!',
+              timeout: 3000,
+              shouldShowTimeoutProgress: true,
+              color: 'success',
+            })
+            router.push('/successful-email-verification')
+            router.refresh()
           })
-          router.push('/successful-email-verification')
-          router.refresh()
-        })
-        .catch(() => setInvalidCode(true))
+          .catch(() => setInvalidCode(true))
+      }
+    } else {
+      if (value.length === 4 && email) {
+        await confirmResetPasswordOtp({ otp: value, email })
+          .then((res: any) => {
+            addToast({
+              title: 'OTP',
+              description: 'Confirm reset password OTP successfully!',
+              timeout: 3000,
+              shouldShowTimeoutProgress: true,
+              color: 'success',
+            })
+            router.push(`/reset-password?token=${res.payload.data.token}`)
+            router.refresh()
+          })
+          .catch(() => setInvalidCode(true))
+      }
     }
   }
 

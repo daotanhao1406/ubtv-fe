@@ -16,7 +16,7 @@ export function MovieSection({ title, movies, className }: MovieSectionProps) {
   return (
     <div className={cn('py-8', className)}>
       <div className='px-4 md:px-6'>
-        <h2 className='mb-6 text-2xl font-bold tracking-tight md:text-3xl'>{title}</h2>
+        <h2 className='mb-6 text-xl font-bold tracking-tight md:text-3xl'>{title}</h2>
 
         <Carousel
           opts={{
@@ -32,8 +32,8 @@ export function MovieSection({ title, movies, className }: MovieSectionProps) {
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious className='left-0.5' />
-          <CarouselNext className='right-0.5' />
+          <CarouselPrevious className='-left-4' />
+          <CarouselNext className='-right-4' />
         </Carousel>
       </div>
     </div>

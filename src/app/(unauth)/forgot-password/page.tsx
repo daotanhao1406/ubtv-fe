@@ -7,7 +7,7 @@ import UnAuthTemplate from '@/app/(unauth)/template'
 
 const ForgotPasswordPage = () => {
   return (
-    <UnAuthTemplate icon={<KeyRoundIcon />} title='Forgot Password?' description='No worries, we’ll send you reset instructions.'>
+    <UnAuthTemplate icon={<KeyRoundIcon />} title='Forgot password?' description='No worries, we’ll send you reset instructions.'>
       <ForgotPasswordForm />
     </UnAuthTemplate>
   )
