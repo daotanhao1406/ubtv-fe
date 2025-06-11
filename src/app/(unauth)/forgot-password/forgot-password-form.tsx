@@ -4,15 +4,21 @@ import { Button as HeroButton, Input } from '@heroui/react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+
+import { handleErrorApi } from '@/lib/helper'
 
 import { Button as ShadcnButton } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 
+import { useAuth } from '@/providers/AuthProvider'
 import { ForgotPasswordBody, ForgotPasswordBodyType } from '@/schema/auth.schema'
 
 const ForgotPasswordForm = () => {
   const router = useRouter()
+  const { forgotPassword } = useAuth()
+  const [loading, setLoading] = useState(false)
   const form = useForm<ForgotPasswordBodyType>({
     resolver: zodResolver(ForgotPasswordBody),
     defaultValues: {
@@ -21,7 +27,20 @@ const ForgotPasswordForm = () => {
   })
   const emailState = form.getFieldState('email')
 
-  const onSubmit = async () => {}
+  const onSubmit = async (values: ForgotPasswordBodyType) => {
+    setLoading(true)
+    await forgotPassword(values)
+      .then(() => {
+        router.push(`/email-verification?type=resetpassword&email=${values.email}`)
+        router.refresh()
+      })
+      .catch((error) => {
+        handleErrorApi({ error })
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }
 
   return (
     <div className='flex flex-col items-center w-3/4 mt-6'>
@@ -38,8 +57,8 @@ const ForgotPasswordForm = () => {
               </FormItem>
             )}
           />
-          <HeroButton color='primary' type='submit' className='w-full h-14 font-bold'>
-            Reset Password
+          <HeroButton isLoading={loading} color='primary' type='submit' className='w-full h-14 font-bold'>
+            Reset password
           </HeroButton>
         </form>
       </Form>

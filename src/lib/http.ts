@@ -3,14 +3,42 @@ import { redirect } from 'next/navigation'
 import envVariables from '@/lib/env'
 import { isBrowser, normalizePath } from '@/lib/utils'
 
-import { LoginResType } from '@/schema/auth.schema'
+import { CustomResponseType, DefaultResType } from '@/api'
+
+const errorCodes = {
+  TOKEN_INVALID: '4',
+}
+
+// Define error response interface (for non-success cases)
+interface ErrorResponse {
+  status: string
+  message: string
+  errorCode: string
+}
+
+// Union type for all possible responses
+type ApiResponse = DefaultResType | ErrorResponse | EntityErrorPayload
+
+// Type guard to check if response is error (but not 422 entity error)
+function isErrorResponse(response: ApiResponse): response is ErrorResponse {
+  return 'errorCode' in response && !('errors' in response)
+}
+
+// Type guard to check if response is success (DefaultResType)
+function isSuccessResponse(response: ApiResponse): response is DefaultResType {
+  return 'data' in response && 'status' in response && 'message' in response && !('errorCode' in response) && !('errors' in response)
+}
+
+// Type guard to check if response is entity error (422)
+function isEntityErrorResponse(response: ApiResponse): response is EntityErrorPayload {
+  return 'errors' in response && Array.isArray((response as any).errors)
+}
 
 type CustomOptions = Omit<RequestInit, 'method'> & {
   baseUrl?: string | undefined
 }
 
 const ENTITY_ERROR_STATUS = 422
-const AUTHENTICATION_ERROR_STATUS = 408
 
 type EntityErrorPayload = {
   message: string
@@ -46,7 +74,7 @@ export class EntityError extends HttpError {
 let clientLogoutRequest: null | Promise<any> = null
 let refreshTokenRequest: null | Promise<any> = null
 
-const request = async <Response>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: string, options?: CustomOptions | undefined, isRetry: boolean = false) => {
+const request = async (method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: string, options?: CustomOptions | undefined, isRetry: boolean = false): Promise<CustomResponseType> => {
   let body: FormData | string | undefined = undefined
   if (options?.body instanceof FormData) {
     body = options.body
@@ -81,47 +109,63 @@ const request = async <Response>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url:
     } as any,
     body,
     method,
+    credentials: 'include',
   })
-  const payload: Response = await res.json()
 
-  const data = {
+  const payload: ApiResponse = await res.json()
+
+  const data: CustomResponseType = {
     status: res.status,
-    payload,
+    payload: payload as DefaultResType,
   }
+
   // Interceptor là nời chúng ta xử lý request và response trước khi trả về cho phía component
   if (!res.ok) {
     if (res.status === ENTITY_ERROR_STATUS) {
-      throw new EntityError(
-        data as {
-          status: 422
-          payload: EntityErrorPayload
-        },
-      )
-    } else if (res.status === AUTHENTICATION_ERROR_STATUS && !isRetry) {
+      // For 422 errors, we expect EntityErrorPayload format
+      if (isEntityErrorResponse(payload)) {
+        throw new EntityError({
+          status: 422,
+          payload: payload,
+        })
+      } else {
+        // Fallback for unexpected 422 format
+        throw new EntityError({
+          status: 422,
+          payload: {
+            message: 'Validation error',
+            errors: [],
+          },
+        })
+      }
+    } else if (isErrorResponse(payload) && payload.errorCode === errorCodes.TOKEN_INVALID && !isRetry) {
       if (isBrowser) {
         // Try to refresh token
         if (!refreshTokenRequest) {
-          refreshTokenRequest = fetch(`${baseUrl}/auth/refresh-token`, {
-            method: 'POST',
+          refreshTokenRequest = fetch(`${baseUrl}/token/refresh-token`, {
+            method: 'GET',
             headers: {
               'Content-Type': 'application/json',
             },
             credentials: 'include', // Include cookies for refresh token
           })
-
           try {
             const refreshRes = await refreshTokenRequest
-            const refreshData = await refreshRes.json()
+            const refreshData: ApiResponse = await refreshRes.json()
 
-            if (!refreshRes.ok) {
+            if (!refreshRes.ok || isErrorResponse(refreshData)) {
               throw new Error('Refresh token failed')
             }
 
             // Update access token
-            const {
-              data: { token },
-            } = refreshData as LoginResType
-            localStorage.setItem('accessToken', token)
+            if (isSuccessResponse(refreshData)) {
+              const {
+                data: { token },
+              } = refreshData
+              localStorage.setItem('accessToken', token as string)
+            } else {
+              throw new Error('Invalid refresh token response format')
+            }
 
             // Reset refresh token request
             refreshTokenRequest = null
@@ -148,7 +192,7 @@ const request = async <Response>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url:
                 localStorage.removeItem('accessTokenExpiresAt')
                 clientLogoutRequest = null
                 refreshTokenRequest = null
-                location.href = '/login'
+                // location.href = '/login'
               }
             }
           }
@@ -164,31 +208,37 @@ const request = async <Response>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url:
 
   if (isBrowser) {
     if (['auth/login', 'auth/refresh-token'].some((item) => item === normalizePath(url))) {
-      const {
-        data: { token },
-      } = payload as LoginResType
-      localStorage.setItem('accessToken', token)
+      if (isSuccessResponse(payload)) {
+        const {
+          data: { token },
+        } = payload
+        localStorage.setItem('accessToken', token as string)
+      }
     } else if ('auth/logout' === normalizePath(url)) {
       localStorage.removeItem('accessToken')
       localStorage.removeItem('accessTokenExpiresAt')
     }
   }
 
-  return data
+  // At this point, we know the request was successful, so we can safely return
+  return {
+    status: res.status,
+    payload: payload as DefaultResType,
+  }
 }
 
 const http = {
-  get<Response>(url: string, options?: Omit<CustomOptions, 'body'> | undefined) {
-    return request<Response>('GET', url, options)
+  get(url: string, options?: Omit<CustomOptions, 'body'> | undefined) {
+    return request('GET', url, options)
   },
-  post<Response>(url: string, body: any, options?: Omit<CustomOptions, 'body'> | undefined) {
-    return request<Response>('POST', url, { ...options, body })
+  post(url: string, body: any, options?: Omit<CustomOptions, 'body'> | undefined) {
+    return request('POST', url, { ...options, body })
   },
-  put<Response>(url: string, body: any, options?: Omit<CustomOptions, 'body'> | undefined) {
-    return request<Response>('PUT', url, { ...options, body })
+  put(url: string, body: any, options?: Omit<CustomOptions, 'body'> | undefined) {
+    return request('PUT', url, { ...options, body })
   },
-  delete<Response>(url: string, options?: Omit<CustomOptions, 'body'> | undefined) {
-    return request<Response>('DELETE', url, { ...options })
+  delete(url: string, options?: Omit<CustomOptions, 'body'> | undefined) {
+    return request('DELETE', url, { ...options })
   },
 }
 
