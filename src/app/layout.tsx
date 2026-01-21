@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { DM_Sans } from 'next/font/google'
 import { Suspense } from 'react'
 
 import '@/styles/globals.css'
@@ -7,6 +8,12 @@ import LoadingComponent from '@/components/LoadingComponent'
 
 import { siteConfig } from '@/constant/config/site'
 import AppProvider from '@/providers/AppProvider'
+
+const dm_sans = DM_Sans({
+  subsets: ['latin'],
+  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
+  variable: '--font-dm_sans',
+})
 
 // !STARTERCONF Change these default meta
 // !STARTERCONF Look at @/constant/config to change them
@@ -45,8 +52,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html suppressHydrationWarning>
-      <body className='dark min-h-screen bg-background font-sans antialiased '>
+    <html className={dm_sans.variable} suppressHydrationWarning>
+      <body className='dark min-h-screen bg-background --font-dm_sans antialiased'>
         <AppProvider>
           <div className='mx-auto relative flex flex-col min-h-screen w-full'>
             <Suspense fallback={<LoadingComponent />}>{children}</Suspense>

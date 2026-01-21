@@ -6,13 +6,19 @@ import { useRef } from 'react'
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel'
 
 import FeaturedHeroVideo from '@/app/home/components/feature-hero-video'
-import { Movie } from '@/app/home/data/movieData'
+
+import { MovieItem } from '@/types/movie'
 interface FeatureHeroProps {
-  movies: Movie[]
+  movies: MovieItem[]
+  loading: boolean
 }
 
-export function FeatureHero({ movies }: FeatureHeroProps) {
+export function FeatureHero({ movies, loading }: FeatureHeroProps) {
   const plugin = useRef(Autoplay({ playOnInit: true, delay: 12000 }))
+
+  if (loading) {
+    return <div className='h-[80vh] w-full bg-default-50' />
+  }
 
   return (
     <div className='relative'>
@@ -26,7 +32,7 @@ export function FeatureHero({ movies }: FeatureHeroProps) {
       >
         <CarouselContent>
           {movies.map((movie, index) => (
-            <CarouselItem key={movie.id}>
+            <CarouselItem key={movie._id}>
               <FeaturedHeroVideo key={index} movie={movie} />
             </CarouselItem>
           ))}
