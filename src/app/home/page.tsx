@@ -1,18 +1,61 @@
+'use client'
+import { useEffect, useState } from 'react'
+
+import { useRequest } from '@/hooks/useRequest'
+
 import { SiteFooter } from '@/components/layout/SiteFooter'
 import SiteHeader from '@/components/layout/SiteHeader'
 
-import { recommendedMovies } from '@/app/home/data/movieData'
 import { FeatureHero } from '@/app/home/partials/feature-hero'
 import { MovieSection } from '@/app/home/partials/movie-section'
-export default async function HomePage() {
+
+import { MovieItem } from '@/types/movie'
+export default function HomePage() {
+  const { movieRequest } = useRequest()
+  const [movies, setMovies] = useState<MovieItem[]>([])
+  const [trendingMovies, setTrendingMovies] = useState<MovieItem[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
+
+  useEffect(() => {
+    const fetchApi = async () => {
+      setLoading(true)
+      await movieRequest('/danh-sach/hoat-hinh?page=1')
+        .then((data) => {
+          if (Array.isArray(data?.data?.items)) {
+            setMovies(data?.data?.items)
+          }
+        })
+        .finally(() => {
+          setLoading(false)
+        })
+    }
+
+    const fetchTrendingApi = async () => {
+      setLoading(true)
+      await movieRequest('/danh-sach/hoat-hinh?page=2')
+        .then((data) => {
+          if (Array.isArray(data?.data?.items)) {
+            setTrendingMovies(data?.data?.items)
+          }
+        })
+        .finally(() => {
+          setLoading(false)
+        })
+    }
+
+    fetchApi()
+    fetchTrendingApi()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   return (
     <>
       <SiteHeader isHome />
-      <FeatureHero movies={recommendedMovies} />
+      <FeatureHero movies={movies} loading={loading} />
       <div className='relative z-10 -mt-48 pb-16'>
-        <MovieSection title='Special For You' movies={recommendedMovies} />
+        <MovieSection title='Special For You' movies={movies} loading={loading} />
 
-        <MovieSection title='Trending Now' movies={recommendedMovies} className='mt-6' />
+        <MovieSection title='Trending Now' className='mt-6' movies={trendingMovies} loading={loading} />
       </div>
       <SiteFooter />
     </>
