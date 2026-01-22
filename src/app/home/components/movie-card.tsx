@@ -1,5 +1,3 @@
-'use client'
-
 import { Card } from '@heroui/react'
 import { Star } from 'lucide-react'
 import Image from 'next/image'
@@ -7,11 +5,9 @@ import Image from 'next/image'
 import { MovieItem } from '@/types/movie'
 
 export function MovieCard({ item }: { item: MovieItem }) {
-  // const [isHovering, setIsHovering] = useState(false)
-
   return (
     <Card
-      className='group relative aspect-[2/3] overflow-hidden rounded-lg transition-transform duration-300'
+      className='group relative aspect-[2/3] overflow-hidden rounded-lg transition-transform duration-300 cursor-pointer'
       // onMouseEnter={() => setIsHovering(true)}
       // onMouseLeave={() => setIsHovering(false)}
     >
@@ -25,7 +21,7 @@ export function MovieCard({ item }: { item: MovieItem }) {
 
       {/* Video/Image Container */}
       <div className='relative h-full w-full'>
-        <Image src={`https://phimimg.com/${item?.poster_url}`} alt={item?.name} fill className='h-full w-full object-cover' />
+        <Image src={item?.poster_url} alt={item?.name} fill className='h-full w-full object-cover' />
 
         {/* Video Overlay */}
         {/* {videoUrl && isHovering && <video src={videoUrl} autoPlay muted playsInline className='absolute inset-0 h-full w-full object-cover' />} */}

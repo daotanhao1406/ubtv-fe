@@ -19,10 +19,10 @@ export default function HomePage() {
   useEffect(() => {
     const fetchApi = async () => {
       setLoading(true)
-      await movieRequest('/danh-sach/hoat-hinh?page=1')
+      await movieRequest('/danh-sach/phim-moi-cap-nhat?page=1')
         .then((data) => {
-          if (Array.isArray(data?.data?.items)) {
-            setMovies(data?.data?.items)
+          if (Array.isArray(data?.items)) {
+            setMovies(data?.items)
           }
         })
         .finally(() => {
@@ -32,10 +32,10 @@ export default function HomePage() {
 
     const fetchTrendingApi = async () => {
       setLoading(true)
-      await movieRequest('/danh-sach/hoat-hinh?page=2')
+      await movieRequest('/danh-sach/phim-moi-cap-nhat?page=2')
         .then((data) => {
-          if (Array.isArray(data?.data?.items)) {
-            setTrendingMovies(data?.data?.items)
+          if (Array.isArray(data?.items)) {
+            setTrendingMovies(data?.items)
           }
         })
         .finally(() => {
