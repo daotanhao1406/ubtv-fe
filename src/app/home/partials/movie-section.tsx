@@ -1,4 +1,5 @@
 import { Card, Skeleton } from '@heroui/react'
+import Link from 'next/link'
 
 import { cn } from '@/lib/utils'
 
@@ -23,7 +24,7 @@ export function MovieSection({ title, movies, loading, className }: MovieSection
         {loading ? (
           <div className='grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-9 gap-4'>
             {Array.from({ length: 6 }).map((item, idx) => (
-              <Card className='h-[225px] w-[150px] p-4' key={idx}>
+              <Card className='h-[225px] w-full p-4' key={idx}>
                 <Skeleton className='rounded-lg'>
                   <div className='h-48 rounded-lg' />
                 </Skeleton>
@@ -41,7 +42,9 @@ export function MovieSection({ title, movies, loading, className }: MovieSection
             <CarouselContent className='-ml-2 md:-ml-4'>
               {movies.map((movie) => (
                 <CarouselItem key={movie._id} className='pl-2 md:pl-4 basis-1/2 md:basis-1/4 lg:basis-1/6 xl:basis-[12.5%] 2xl:basis-[11.1%] min-[2560px]:basis-1/12'>
-                  <MovieCard item={movie} />
+                  <Link href={`/movie/${movie.slug}`}>
+                    <MovieCard item={movie} />
+                  </Link>
                 </CarouselItem>
               ))}
             </CarouselContent>

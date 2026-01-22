@@ -20,7 +20,7 @@ export default function FeaturedHeroVideo({ movie }: VideoSlideProps) {
     <div className='relative h-[80vh] w-full overflow-hidden'>
       {/* Background Video */}
       {/* <video src={movie.videoUrl} autoPlay muted className='object-cover absolute inset-0 h-full w-full' /> */}
-      <Image src={`https://phimimg.com/${movie?.thumb_url}`} fill alt={movie.name} className='object-cover absolute inset-0 h-full w-full' />
+      <Image src={movie?.thumb_url} fill alt={movie.name} className='object-cover absolute inset-0 h-full w-full' />
 
       {/* Overlay */}
       <div className='absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent' />
