@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import { DM_Sans } from 'next/font/google'
+import { Manrope } from 'next/font/google'
 import { Suspense } from 'react'
 
 import '@/styles/globals.css'
@@ -9,10 +9,10 @@ import LoadingComponent from '@/components/LoadingComponent'
 import { siteConfig } from '@/constant/config/site'
 import AppProvider from '@/providers/AppProvider'
 
-const dm_sans = DM_Sans({
+const manrope = Manrope({
   subsets: ['latin'],
-  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
-  variable: '--font-dm_sans',
+  weight: ['200', '300', '400', '500', '600', '700', '800'],
+  variable: '--font-manrope',
 })
 
 // !STARTERCONF Change these default meta
@@ -52,8 +52,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html className={dm_sans.variable} suppressHydrationWarning>
-      <body className='dark min-h-screen bg-background --font-dm_sans antialiased'>
+    <html className={manrope.variable} suppressHydrationWarning>
+      <body className='dark min-h-screen bg-background font-sans antialiased'>
         <AppProvider>
           <div className='mx-auto relative flex flex-col min-h-screen w-full'>
             <Suspense fallback={<LoadingComponent />}>{children}</Suspense>
