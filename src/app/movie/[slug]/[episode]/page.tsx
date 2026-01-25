@@ -40,7 +40,7 @@ export default function MovieEpisodePage() {
       <div className='h-20' />
       {/* <h1 className='text-2xl font-bold mb-4'>{movieData.name}</h1> */}
       <div className='mt-6'>
-        <VideoPlayer src={episodeSource || ''} poster={movie?.movie?.thumb_url || ''} />
+        <VideoPlayer title={movie?.movie?.name || ''} src={episodeSource || ''} poster={movie?.movie?.thumb_url || ''} />
       </div>
       <div className='mt-6 grid grid-cols-3 gap-12'>
         <div className='col-span-2'>
