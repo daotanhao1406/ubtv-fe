@@ -19,7 +19,7 @@ export default function HomePage() {
   useEffect(() => {
     const fetchApi = async () => {
       setLoading(true)
-      await movieRequest('/danh-sach/phim-moi-cap-nhat?page=1')
+      await movieRequest('/danh-sach/phim-moi-cap-nhat?page=1&type=hoat-hinh')
         .then((data) => {
           if (Array.isArray(data?.items)) {
             setMovies(data?.items)

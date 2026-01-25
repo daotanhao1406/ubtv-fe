@@ -1,6 +1,7 @@
 'use client'
 
 import { Home } from 'lucide-react'
+import Link from 'next/link'
 
 import { Button } from '@/components/ui/button'
 
@@ -17,10 +18,12 @@ export function ErrorPageTemplate({ code, title, description }: ErrorPageProps) 
         <h1 className='text-8xl font-bold leading-none tracking-tight'>{code}</h1>
         <h2 className='text-4xl font-bold mt-4'>{title}</h2>
         <p className='mt-8'>{description}</p>
-        <Button className='gap-2 mt-6'>
-          <Home size={16} />
-          Return Home
-        </Button>
+        <Link href='/'>
+          <Button className='gap-2 mt-6'>
+            <Home size={16} />
+            Return Home
+          </Button>
+        </Link>
       </div>
     </main>
   )

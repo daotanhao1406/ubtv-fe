@@ -6,7 +6,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        dm_sans: ['var(--font-dm_sans)', 'sans-serif'],
+        manrope: ['var(--font-manrope)', 'sans-serif'],
       },
       keyframes: {
         shine: {

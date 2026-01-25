@@ -1,3 +1,5 @@
+import { EpisodeReponse } from '@/types/episode'
+
 export interface TmdbInfo {
   type: 'tv' | 'movie'
   id: string
@@ -33,8 +35,13 @@ export interface MovieItem {
   slug: string
   origin_name: string
 
-  type: string // ví dụ: 'hoathinh'
+  type: string
   year: number
+
+  content?: string
+
+  director?: string[]
+  actor?: string[]
 
   poster_url: string
   thumb_url: string
@@ -55,4 +62,11 @@ export interface MovieItem {
 
   category: Category[]
   country: Country[]
+}
+
+export interface MovieResponse {
+  status: boolean
+  msg: string
+  movie: MovieItem
+  episodes: EpisodeReponse[]
 }
