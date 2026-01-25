@@ -8,13 +8,14 @@ import '@vidstack/react/player/styles/default/layouts/audio.css'
 import '@vidstack/react/player/styles/default/layouts/video.css'
 
 interface VideoPlayerProps {
+  title?: string
   src: string
   poster?: string // Ảnh thumbnail nếu API có trả về
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster }) => {
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, title }) => {
   return (
-    <MediaPlayer src={src} viewType='video' streamType='on-demand' logLevel='warn' crossOrigin playsInline title='Sprite Fight' poster={poster || 'https://files.vidstack.io/sprite-fight/poster.webp'}>
+    <MediaPlayer src={src} viewType='video' streamType='on-demand' logLevel='warn' crossOrigin playsInline title={title || 'Tên phim'} poster={poster || ''}>
       <MediaProvider>
         <Poster className='vds-poster' />
       </MediaProvider>
