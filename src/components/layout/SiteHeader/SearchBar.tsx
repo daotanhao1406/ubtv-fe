@@ -1,28 +1,65 @@
-import { Button, ButtonProps, Kbd } from '@heroui/react'
+'use client'
+import { Input } from '@heroui/react'
 import { Search as SearchIcon } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
-export default function SearchBar({ onClick }: ButtonProps) {
+import { sanitizeInput } from '@/lib/utils/sanitizeInput'
+
+export default function SearchBar() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [inputValue, setInputValue] = useState('')
+
+  // 1. useEffect để đồng bộ state với URL
+  useEffect(() => {
+    // Lấy params 'q' hiện tại từ URL
+    const currentQuery = searchParams.get('q')
+
+    if (currentQuery) {
+      // Decode để hiển thị tiếng Việt đẹp (ví dụ: %20 -> khoảng trắng)
+      setInputValue(decodeURIComponent(currentQuery))
+    } else {
+      // Nếu không có q (về trang chủ), reset input
+      setInputValue('')
+    }
+  }, [searchParams]) // Chạy lại mỗi khi URL thay đổi
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+
+      const cleanText = sanitizeInput(inputValue)
+
+      if (!cleanText) {
+        return
+      }
+
+      router.push(`/search?q=${encodeURIComponent(cleanText)}`)
+    }
+  }
   return (
     <>
       <div className='sm:hidden'>
-        <button className='transition-opacity p-1 hover:opacity-80 rounded-full cursor-pointer outline-none' onClick={onClick}>
+        <button className='transition-opacity p-1 hover:opacity-80 rounded-full cursor-pointer outline-none'>
           <SearchIcon className='mt-px text-default-600 dark:text-default-500' size={20} />
         </button>
       </div>
       <div className='hidden sm:flex'>
-        <Button
-          aria-label='Search anime'
-          className='text-sm font-normal text-default-500 bg-default-400/20 dark:bg-default-500/20'
-          endContent={
-            <Kbd className='hidden py-0.5 px-2 lg:inline-block' keys='command'>
-              K
-            </Kbd>
-          }
-          startContent={<SearchIcon className='text-base text-default-400 pointer-events-none flex-shrink-0' size={18} strokeWidth={2} />}
-          onClick={onClick}
-        >
-          Search Anime...
-        </Button>
+        <Input
+          classNames={{
+            base: 'max-w-80 h-10',
+            mainWrapper: 'h-full',
+            input: 'text-small',
+            inputWrapper: 'h-full font-normal text-default-500 bg-default-400/20 dark:bg-default-500/20',
+          }}
+          placeholder='Type to search...'
+          size='sm'
+          startContent={<SearchIcon size={18} />}
+          type='search'
+          value={inputValue}
+          onValueChange={setInputValue} // HeroUI dùng onValueChange thay vì onChange
+          onKeyDown={handleKeyDown}
+        />
       </div>
     </>
   )

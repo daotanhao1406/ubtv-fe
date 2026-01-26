@@ -10,7 +10,7 @@ import '@vidstack/react/player/styles/default/layouts/video.css'
 interface VideoPlayerProps {
   title?: string
   src: string
-  poster?: string // Ảnh thumbnail nếu API có trả về
+  poster?: string
 }
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, title }) => {

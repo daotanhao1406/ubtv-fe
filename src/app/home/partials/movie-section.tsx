@@ -33,6 +33,9 @@ export function MovieSection({ title, movies, loading, className, isCarousel }: 
         </div>
       )
     }
+    if (!Array.isArray(movies) || movies.length === 0) {
+      return <div className='h-[225px] w-full text-center'>No movies found.</div>
+    }
     if (isCarousel) {
       return (
         <Carousel
@@ -68,12 +71,9 @@ export function MovieSection({ title, movies, loading, className, isCarousel }: 
   }, [loading, isCarousel, movies])
 
   return (
-    <div className={cn('py-8', className)}>
-      <div className='px-4 md:px-6'>
-        <h2 className='mb-6 text-xl font-bold tracking-tight md:text-3xl'>{title}</h2>
-
-        {renderListMovies()}
-      </div>
+    <div className={cn('py-8 px-4 md:px-6', className)}>
+      {title && <h2 className='mb-6 text-xl font-bold tracking-tight md:text-3xl'>{title}</h2>}
+      {renderListMovies()}
     </div>
   )
 }
