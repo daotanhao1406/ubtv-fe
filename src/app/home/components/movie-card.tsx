@@ -5,6 +5,8 @@ import Image from 'next/image'
 import { MovieItem } from '@/types/movie'
 
 export function MovieCard({ item }: { item: MovieItem }) {
+  const imageSrc = item?.poster_url?.includes('http') ? item?.poster_url : `https://phimimg.com/${item?.poster_url}`
+
   return (
     <Card
       className='group relative aspect-[2/3] overflow-hidden rounded-lg transition-transform duration-300 cursor-pointer'
@@ -21,7 +23,7 @@ export function MovieCard({ item }: { item: MovieItem }) {
 
       {/* Video/Image Container */}
       <div className='relative h-full w-full'>
-        <Image src={item?.poster_url} alt={item?.name} fill className='h-full w-full object-cover' />
+        <Image src={imageSrc} alt={item?.name} fill className='h-full w-full object-cover' />
 
         {/* Video Overlay */}
         {/* {videoUrl && isHovering && <video src={videoUrl} autoPlay muted playsInline className='absolute inset-0 h-full w-full object-cover' />} */}
