@@ -47,13 +47,14 @@ export default function SearchBar() {
       <div className='hidden sm:flex'>
         <Input
           classNames={{
-            base: 'max-w-80 h-10',
+            base: 'max-w-96 h-10',
             mainWrapper: 'h-full',
             input: 'text-small',
             inputWrapper: 'h-full font-normal text-default-500 bg-default-400/20 dark:bg-default-500/20',
           }}
           placeholder='Type to search...'
           size='sm'
+          className='w-96'
           startContent={<SearchIcon size={18} />}
           type='search'
           value={inputValue}

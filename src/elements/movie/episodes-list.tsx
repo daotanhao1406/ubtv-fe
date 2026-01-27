@@ -16,7 +16,7 @@ export default function EpisodesList({ slug, episodes }: { slug: string; episode
   return (
     <div className='font-manrope'>
       <Card shadow='none'>
-        <CardBody className='p-10'>
+        <CardBody className='p-10 flex flex-col'>
           <div className='text-white/60'>Episodes</div>
 
           <div className='flex flex-wrap gap-2.5 mt-6'>
@@ -27,7 +27,7 @@ export default function EpisodesList({ slug, episodes }: { slug: string; episode
             ))} */}
             {episodes.map((episode) => (
               <Link key={episode.slug} href={`/movie/${slug}/${episode.slug}`}>
-                <Button variant='outline' className='text-sm border-1 bg-transparent h-9 w-9' size='icon'>
+                <Button variant='outline' className='text-sm border-1 bg-transparent h-10 w-10' size='icon'>
                   {getEpisodeNumber(episode.slug)}
                 </Button>
               </Link>
