@@ -36,7 +36,7 @@ export default function MovieEpisodePage() {
   }, [params.slug])
 
   return (
-    <div className='px-6'>
+    <div className='px-6 max-w-[1560px] mx-auto'>
       <div className='h-20' />
       {/* <h1 className='text-2xl font-bold mb-4'>{movieData.name}</h1> */}
       <div className='mt-6'>
