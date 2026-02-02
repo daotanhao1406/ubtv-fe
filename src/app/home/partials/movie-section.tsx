@@ -18,7 +18,7 @@ interface MovieSectionProps {
   isCarousel?: boolean
 }
 
-export function MovieSection({ title, movies, loading, className, isCarousel }: MovieSectionProps) {
+export function MovieSection({ title, movies, loading = true, className, isCarousel }: MovieSectionProps) {
   const renderListMovies = useCallback(() => {
     if (loading) {
       return (

@@ -47,7 +47,7 @@ export default function MovieEpisodePage() {
           <MovieEpisodeInformation movie={movie?.movie} />
         </div>
         <div className='col-span-1'>
-          <EpisodesList slug={params?.slug} episodes={movie?.episodes?.[0]?.server_data || []} />
+          <EpisodesList selectedEpisodeSlug={params.episode} slug={params?.slug} episodes={movie?.episodes?.[0]?.server_data || []} />
         </div>
       </div>
 

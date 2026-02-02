@@ -12,7 +12,13 @@ function getEpisodeNumber(slug: string) {
   return Number.isNaN(num) ? null : String(num)
 }
 
-export default function EpisodesList({ slug, episodes }: { slug: string; episodes: EpisodeItem[] }) {
+interface EpisodesListProps {
+  slug: string
+  episodes: EpisodeItem[]
+  selectedEpisodeSlug?: string
+}
+
+export default function EpisodesList({ slug, episodes, selectedEpisodeSlug }: EpisodesListProps) {
   return (
     <div className='font-manrope'>
       <Card shadow='none'>
@@ -27,7 +33,7 @@ export default function EpisodesList({ slug, episodes }: { slug: string; episode
             ))} */}
             {episodes.map((episode) => (
               <Link key={episode.slug} href={`/movie/${slug}/${episode.slug}`}>
-                <Button variant='outline' className='text-sm border-1 bg-transparent h-10 w-10' size='icon'>
+                <Button variant={selectedEpisodeSlug === episode.slug ? 'default' : 'ghost'} className='text-sm border-1 h-10 w-10' size='icon'>
                   {getEpisodeNumber(episode.slug)}
                 </Button>
               </Link>

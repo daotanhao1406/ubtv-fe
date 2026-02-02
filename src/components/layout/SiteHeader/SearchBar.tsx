@@ -1,7 +1,7 @@
 'use client'
 import { Input } from '@heroui/react'
 import { Search as SearchIcon } from 'lucide-react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 import { sanitizeInput } from '@/lib/utils/sanitizeInput'
@@ -10,11 +10,12 @@ export default function SearchBar() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [inputValue, setInputValue] = useState('')
+  const pathname = usePathname()
 
   // 1. useEffect để đồng bộ state với URL
   useEffect(() => {
     // Lấy params 'q' hiện tại từ URL
-    const currentQuery = searchParams.get('q')
+    const currentQuery = searchParams.get('keyword')
 
     if (currentQuery) {
       // Decode để hiển thị tiếng Việt đẹp (ví dụ: %20 -> khoảng trắng)
@@ -34,10 +35,10 @@ export default function SearchBar() {
         return
       }
 
-      router.push(`/search?q=${encodeURIComponent(cleanText)}`)
+      router.push(`/search?keyword=${encodeURIComponent(cleanText)}`)
     }
   }
-  return (
+  return pathname !== '/search' ? (
     <>
       <div className='sm:hidden'>
         <button className='transition-opacity p-1 hover:opacity-80 rounded-full cursor-pointer outline-none'>
@@ -63,7 +64,7 @@ export default function SearchBar() {
         />
       </div>
     </>
-  )
+  ) : null
 }
 
 export function SearchSkeleton() {

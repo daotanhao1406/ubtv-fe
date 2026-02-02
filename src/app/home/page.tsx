@@ -10,6 +10,7 @@ import { FeatureHero } from '@/app/home/partials/feature-hero'
 import { MovieSection } from '@/app/home/partials/movie-section'
 
 import { MovieItem } from '@/types/movie'
+
 export default function HomePage() {
   const { movieRequest } = useRequest()
   const [movies, setMovies] = useState<MovieItem[]>([])
