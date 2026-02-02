@@ -1,8 +1,8 @@
 'use client'
 
+import { addToast, Button as HeroButton, Divider, Input, Spinner } from '@heroui/react'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button as NextButton, Divider, Input, Spinner } from '@nextui-org/react'
-import { ArrowRight, Mail } from 'lucide-react'
+import { ArrowRight, LogIn, Mail } from 'lucide-react'
 import { Eye, EyeOff } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import FacebookIcon from 'public/svg/facebook.svg'
@@ -11,7 +11,6 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { handleErrorApi } from '@/lib/helper'
-import { useToast } from '@/hooks/useToast'
 
 import { Button as ShadcnButton } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
@@ -22,29 +21,33 @@ import { LoginBody, LoginBodyType } from '@/schema/auth.schema'
 const LoginForm = () => {
   const [loading, setLoading] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
-  const { toast } = useToast()
-  const router = useRouter()
   const { login } = useAuth()
+  const router = useRouter()
   const form = useForm<LoginBodyType>({
     resolver: zodResolver(LoginBody),
     defaultValues: {
-      username: '',
+      email: '',
       password: '',
     },
   })
-  const usernameState = form.getFieldState('username')
+  const emailState = form.getFieldState('email')
   const passwordState = form.getFieldState('password')
 
+  async function signInWithGoogle() {}
+
   const toggleVisibility = () => setIsVisible(!isVisible)
-  // 2. Define a submit handler.
-  async function onSubmit(values: LoginBodyType) {
+
+  const onSubmit = async (values: LoginBodyType) => {
     setLoading(true)
     await login(values)
       .then(() => {
-        toast({
-          description: 'Login success',
+        addToast({
           title: 'Login',
-          duration: 3000,
+          description: 'Login successfully!',
+          timeout: 3000,
+          shouldShowTimeoutProgress: true,
+          color: 'success',
+          icon: <LogIn />,
         })
         router.push('/')
         router.refresh()
@@ -54,18 +57,19 @@ const LoginForm = () => {
         setLoading(false)
       })
   }
+
   return (
-    <div className='flex flex-col items-center w-3/4 mt-10 xl:w-1/2'>
+    <div className='flex flex-col items-center w-3/4 mt-10 xl:w-1/2 2xl:w-2/5'>
       <div className='flex flex-col-reverse lg:flex-row items-center w-full justify-center lg:justify-between'>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4 max-w-80 flex-shrink-0 w-full' noValidate>
             <FormField
               control={form.control}
-              name='username'
+              name='email'
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input variant={usernameState.invalid ? 'bordered' : 'flat'} isInvalid={usernameState.invalid} className='rounded-none' type='text' label='Username' {...field} />
+                    <Input variant={emailState.invalid ? 'bordered' : 'flat'} isInvalid={emailState.invalid} className='rounded-none' type='text' label='Email' {...field} />
                   </FormControl>
                 </FormItem>
               )}
@@ -93,9 +97,9 @@ const LoginForm = () => {
               )}
             />
 
-            <NextButton isDisabled={loading} color='primary' type='submit' endContent={loading ? <Spinner size='sm' color='default' /> : <ArrowRight size={20} />} className='w-full h-14 rounded-sm font-bold flex justify-between'>
+            <HeroButton isDisabled={loading} color='primary' type='submit' endContent={loading ? <Spinner size='sm' color='default' /> : <ArrowRight size={20} />} className='w-full h-14 rounded-sm font-bold flex justify-between'>
               Login to Your Account
-            </NextButton>
+            </HeroButton>
           </form>
         </Form>
         <div className='hidden lg:block'>/</div>
@@ -105,22 +109,23 @@ const LoginForm = () => {
           <Divider className='w-1/3' />
         </div>
         <div className='flex lg:flex flex-col space-y-4 max-w-80 flex-shrink-0 w-full'>
-          <NextButton startContent={<GoogleIcon className='w-6 mr-2' />} variant='bordered' className='font-semibold h-14 flex justify-start'>
+          <HeroButton isDisabled={loading} onClick={signInWithGoogle} startContent={<GoogleIcon className='w-6 mr-2' />} variant='bordered' className='font-semibold h-14 flex justify-start'>
             Sign in with Google
-          </NextButton>
-          <NextButton startContent={<FacebookIcon className='w-6 mr-2' />} variant='bordered' className='font-semibold h-14 flex justify-start'>
+          </HeroButton>
+          <HeroButton isDisabled={loading} startContent={<FacebookIcon className='w-6 mr-2' />} variant='bordered' className='font-semibold h-14 flex justify-start'>
             Sign in with Facebook
-          </NextButton>
-          <NextButton startContent={<Mail className='w-6 mr-2' />} variant='bordered' className='font-semibold h-14 flex justify-start'>
+          </HeroButton>
+          <HeroButton isDisabled={loading} startContent={<Mail className='w-6 mr-2' />} variant='bordered' className='font-semibold h-14 flex justify-start'>
             Sign in with Email
-          </NextButton>
+          </HeroButton>
         </div>
       </div>
-      <div>
-        <ShadcnButton variant='linkHover1' className='mt-10 font-semibold'>
-          Forgot Password?
-        </ShadcnButton>
-      </div>
+      <ShadcnButton onClick={() => router.push('/signup')} variant='linkHover1' className='font-semibold mt-10'>
+        Don't have an account? Create one here
+      </ShadcnButton>
+      <ShadcnButton onClick={() => router.push('/forgot-password')} variant='linkHover1' className='font-semibold'>
+        Forgot Password?
+      </ShadcnButton>
     </div>
   )
 }

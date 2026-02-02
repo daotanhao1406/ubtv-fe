@@ -1,0 +1,46 @@
+import { Card, CardBody } from '@heroui/react'
+import Link from 'next/link'
+
+import { Button } from '@/components/ui/button'
+
+import { EpisodeItem } from '@/types/episode'
+
+function getEpisodeNumber(slug: string) {
+  if (typeof slug !== 'string') return null
+  if (slug === 'full') return 'Full'
+  const num = Number(slug.split('-')[1])
+  return Number.isNaN(num) ? null : String(num)
+}
+
+interface EpisodesListProps {
+  slug: string
+  episodes: EpisodeItem[]
+  selectedEpisodeSlug?: string
+}
+
+export default function EpisodesList({ slug, episodes, selectedEpisodeSlug }: EpisodesListProps) {
+  return (
+    <div className='font-manrope'>
+      <Card shadow='none'>
+        <CardBody className='p-10 flex flex-col'>
+          <div className='text-white/60'>Episodes</div>
+
+          <div className='flex flex-wrap gap-2.5 mt-6'>
+            {/* {episodes.map((episode) => (
+              <Button key={episode.slug} variant='ghost' radius='sm' isIconOnly className='text-sm border-1' size='sm'>
+                {getEpisodeNumber(episode.slug)}
+              </Button>
+            ))} */}
+            {episodes.map((episode) => (
+              <Link key={episode.slug} href={`/movie/${slug}/${episode.slug}`}>
+                <Button variant={selectedEpisodeSlug === episode.slug ? 'default' : 'ghost'} className='text-sm border-1 h-10 w-10' size='icon'>
+                  {getEpisodeNumber(episode.slug)}
+                </Button>
+              </Link>
+            ))}
+          </div>
+        </CardBody>
+      </Card>
+    </div>
+  )
+}

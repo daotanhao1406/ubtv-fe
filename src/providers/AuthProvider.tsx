@@ -1,22 +1,27 @@
 'use client'
+import { addToast } from '@heroui/react'
 import { usePathname, useRouter } from 'next/navigation'
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
 import { handleErrorApi } from '@/lib/helper'
 import { useLocalStorage } from '@/hooks'
-import { toast } from '@/hooks/useToast'
 
+import { CustomResponseType } from '@/api'
 import authApiRequest from '@/api/auth'
 import userApiRequest from '@/api/user'
-import { LoginBodyType, RegisterBodyType } from '@/schema/auth.schema'
+import { publicRoutes } from '@/middleware'
+import { ForgotPasswordBodyType, LoginBodyType, ResetPasswordBodyType, SignUpBodyType } from '@/schema/auth.schema'
 
 type AuthContextType = {
   user?: User | null
   setUser: (user: User | null) => void
   login: (body: LoginBodyType) => Promise<void>
   logout: () => Promise<void>
-  register: (body: RegisterBodyType) => Promise<void>
-  status: undefined | 'loggedIn' | 'loggedOut'
+  register: (body: SignUpBodyType) => Promise<void>
+  forgotPassword: (body: ForgotPasswordBodyType) => Promise<void>
+  resetPassword: (body: ResetPasswordBodyType) => Promise<void>
+  confirmResgisterOtp: (body: { otp: string; username: string }) => Promise<void>
+  confirmResetPasswordOtp: (body: { otp: string; email: string }) => Promise<CustomResponseType>
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType)
@@ -24,28 +29,26 @@ const AuthContext = createContext<AuthContextType>({} as AuthContextType)
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
-  const [user, setUser] = useState<User | null>(null)
-  const [status, setStatus] = useState<undefined | 'loggedIn' | 'loggedOut'>()
+  const [user, setUser] = useState<any>(null)
   const [accessToken, setAccessToken] = useLocalStorage<string | undefined>('accessToken', {
     onError(error) {
       const errorValue = error as Error
-      return toast({
+      return addToast({
         title: 'Get local storage error',
         description: errorValue.message,
-        variant: 'destructive',
+        color: 'danger',
       })
     },
     serializer: (v) => v ?? '',
     deserializer: (v) => v,
   })
+
   const logout = useCallback(async () => {
     try {
       await authApiRequest.logoutFromNextClientToNextServer()
       router.push('/login')
-    } catch (error) {
-      handleErrorApi({
-        error,
-      })
+    } catch (error: any) {
+      handleErrorApi({ error })
       authApiRequest.logoutFromNextClientToNextServer(true).then(() => {
         router.push(`/login?redirectFrom=${pathname}`)
       })
@@ -53,38 +56,75 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       router.refresh()
       setAccessToken(undefined)
       setUser(null)
-      setStatus('loggedOut')
     }
   }, [pathname, router, setAccessToken])
-  const fetchMe = useCallback(async () => {
-    try {
-      const res = await userApiRequest.meClient()
-      setUser(res.payload || null)
-      setStatus(res.payload ? 'loggedIn' : undefined)
-    } catch (error) {
-      logout()
-      handleErrorApi({ error })
-    }
-  }, [setUser, setStatus, logout])
+
   const login = useCallback(
     async (body: LoginBodyType) => {
       const result = await authApiRequest.login(body)
       await authApiRequest.authToNextServer({
-        accessToken: result.payload.accessToken,
-        expiresAt: '1800',
+        accessToken: result.payload.data.token,
+        refreshToken: result.payload.data.refreshToken,
       })
-      setAccessToken(result.payload.accessToken)
-      setStatus('loggedIn')
+      setAccessToken(result.payload.data.token)
+      const res = await userApiRequest.meClient()
+      setUser(res.payload.data || null)
     },
     [setAccessToken],
   )
 
-  const register = useCallback(async () => {}, [])
+  const register = async (body: SignUpBodyType) => {
+    await authApiRequest.register(body)
+  }
+
+  const confirmResgisterOtp = useCallback(
+    async (body: { otp: string; username: string }) => {
+      const result = await authApiRequest.confirmResgisterOtp(body)
+      await authApiRequest.authToNextServer({
+        accessToken: result.payload.data.token,
+        refreshToken: result.payload.data.refreshToken,
+      })
+      setAccessToken(result.payload.data.token)
+    },
+    [setAccessToken],
+  )
+  const confirmResetPasswordOtp = async (body: { otp: string; email: string }) => {
+    return await authApiRequest.confirmResetPasswordOtp(body)
+  }
+  const forgotPassword = async (body: ForgotPasswordBodyType) => {
+    await authApiRequest.forgotPassword(body)
+  }
+
+  const resetPassword = async (body: ResetPasswordBodyType) => {
+    await authApiRequest.resetPassword(body)
+  }
+
+  const fetchMe = useCallback(
+    async (accessToken?: string) => {
+      if (!accessToken) {
+        if (publicRoutes.includes(pathname)) {
+          return
+        }
+        setUser(null)
+        // router.push('/login')
+        return
+      }
+
+      await userApiRequest
+        .meClient()
+        .then((res) => setUser(res.payload.data || null))
+        .catch((error: any) => {
+          if (!publicRoutes.includes(pathname)) {
+            logout()
+          }
+          handleErrorApi({ error })
+        })
+    },
+    [logout, pathname],
+  )
 
   useEffect(() => {
-    if (accessToken) {
-      fetchMe()
-    }
+    fetchMe(accessToken)
   }, [accessToken, fetchMe])
 
   return (
@@ -92,10 +132,13 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       value={{
         user,
         setUser,
-        status,
         login,
         logout,
         register,
+        confirmResgisterOtp,
+        confirmResetPasswordOtp,
+        forgotPassword,
+        resetPassword,
       }}
     >
       {children}

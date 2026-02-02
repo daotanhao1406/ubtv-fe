@@ -1,23 +1,30 @@
 import http from '@/lib/http'
 
-import { LoginBodyType, LoginResType, RegisterBodyType, RegisterResType, SlideSessionResType } from '@/schema/auth.schema'
-import { MessageResType } from '@/schema/common.schema'
+import { ForgotPasswordBodyType, LoginBodyType, ResetPasswordBodyType, SignUpBodyType } from '@/schema/auth.schema'
 
 const authApiRequest = {
-  login: (body: LoginBodyType) => http.post<LoginResType>('/auth/login', body),
+  login: (body: LoginBodyType) => http.post('/auth/login', body),
 
-  register: (body: RegisterBodyType) => http.post<RegisterResType>('/auth/register', body),
+  register: (body: SignUpBodyType) => http.post('/auth/register', body),
 
-  refreshToken: (body: { refreshToken: string }) => http.post<LoginResType>('/auth/refresh', body),
+  confirmResgisterOtp: (body: { otp: string; username: string }) => http.put('/auth/otp', body),
+
+  confirmResetPasswordOtp: (body: { otp: string; email: string }) => http.post('/auth/otp/reset-password/confirm', body),
+
+  forgotPassword: (body: ForgotPasswordBodyType) => http.post('/auth/reset-password', body),
+
+  resetPassword: (body: ResetPasswordBodyType) => http.post('/auth/reset-password/submit', body),
+
+  refreshToken: () => http.get('/auth/refresh'),
 
   // Set access token to cookies in next server
-  authToNextServer: (body: { accessToken: string; expiresAt: string }) =>
+  authToNextServer: (body: { accessToken: string; refreshToken: string }) =>
     http.post('/api/auth', body, {
       baseUrl: '',
     }),
 
   logoutFromNextServerToServer: (accessToken: string) =>
-    http.post<MessageResType>(
+    http.post(
       '/auth/logout',
       {},
       {
@@ -28,7 +35,7 @@ const authApiRequest = {
     ),
 
   logoutFromNextClientToNextServer: (force?: boolean | undefined, signal?: AbortSignal | undefined) =>
-    http.post<MessageResType>(
+    http.post(
       '/api/auth/logout',
       {
         force,
@@ -40,7 +47,7 @@ const authApiRequest = {
     ),
 
   slideSessionFromNextServerToServer: (accessToken: string) =>
-    http.post<SlideSessionResType>(
+    http.post(
       '/auth/slide-session',
       {},
       {
@@ -50,7 +57,7 @@ const authApiRequest = {
       },
     ),
 
-  slideSessionFromNextClientToNextServer: () => http.post<SlideSessionResType>('/api/auth/slide-session', {}, { baseUrl: '' }),
+  slideSessionFromNextClientToNextServer: () => http.post('/api/auth/slide-session', {}, { baseUrl: '' }),
 }
 
 export default authApiRequest

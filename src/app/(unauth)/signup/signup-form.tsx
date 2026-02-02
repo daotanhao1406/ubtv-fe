@@ -1,0 +1,156 @@
+'use client'
+
+import { Button, Input, Spinner } from '@heroui/react'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Eye, EyeOff } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+
+import { handleErrorApi } from '@/lib/helper'
+
+import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
+
+import { useAuth } from '@/providers/AuthProvider'
+import { SignUpBody, SignUpBodyType } from '@/schema/auth.schema'
+
+const SignUpForm = () => {
+  const [loading, setLoading] = useState(false)
+  const [isVisible, setIsVisible] = useState(false)
+  const [isConfirmVisible, setIsConfirmVisible] = useState(false)
+  const { register } = useAuth()
+  const router = useRouter()
+  const form = useForm<SignUpBodyType>({
+    resolver: zodResolver(SignUpBody),
+    defaultValues: {
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
+  })
+  const usernameState = form.getFieldState('username')
+  const emailState = form.getFieldState('email')
+  const passwordState = form.getFieldState('password')
+  const confirmPasswordState = form.getFieldState('confirmPassword')
+  const password = form.watch('password')
+  const passwordErrors: string[] = []
+
+  if (password.length < 6) {
+    passwordErrors.push('Password must be 6 characters or more.')
+  }
+  const toggleVisibility = () => setIsVisible(!isVisible)
+  const toggleConfirmVisibility = () => setIsConfirmVisible(!isConfirmVisible)
+  const onSubmit = async (values: SignUpBodyType) => {
+    setLoading(true)
+    await register(values)
+      .then(() => {
+        // addToast({
+        //   title: 'Sign Up',
+        //   description: 'Sign Up successfully!',
+        //   timeout: 3000,
+        //   shouldShowTimeoutProgress: true,
+        //   color: 'success',
+        // })
+        router.push(`/email-verification?type=register&email=${values.email}&username=${values.username}`)
+        router.refresh()
+      })
+      .catch((error) => {
+        handleErrorApi({ error })
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }
+
+  return (
+    <div className='flex flex-col mt-10'>
+      <div className='flex w-full'>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4 w-[440px]' noValidate>
+            <FormField
+              control={form.control}
+              name='username'
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input errorMessage={usernameState.error?.message} variant={usernameState.invalid ? 'bordered' : 'flat'} isInvalid={usernameState.invalid} className='rounded-none' type='text' label='Username' {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='email'
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input errorMessage={emailState.error?.message} variant={emailState.invalid ? 'bordered' : 'flat'} isInvalid={emailState.invalid} className='rounded-none' type='text' label='Email' {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='password'
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      errorMessage={() => (
+                        <ul>
+                          {passwordErrors.map((error, i) => (
+                            <li key={i}>{error}</li>
+                          ))}
+                        </ul>
+                      )}
+                      variant={passwordState.invalid ? 'bordered' : 'flat'}
+                      type={isVisible ? 'text' : 'password'}
+                      label='Password'
+                      isInvalid={passwordState.invalid}
+                      endContent={
+                        <button className='focus:outline-none' type='button' onClick={toggleVisibility} aria-label='toggle password visibility'>
+                          {isVisible ? <Eye className='text-2xl text-default-400 pointer-events-none' /> : <EyeOff className='text-2xl text-default-400 pointer-events-none' />}
+                        </button>
+                      }
+                      {...field}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='confirmPassword'
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      errorMessage={confirmPasswordState.error?.message}
+                      variant={confirmPasswordState.invalid ? 'bordered' : 'flat'}
+                      type={isConfirmVisible ? 'text' : 'password'}
+                      label='Confirm Password'
+                      isInvalid={confirmPasswordState.invalid}
+                      endContent={
+                        <button className='focus:outline-none' type='button' onClick={toggleConfirmVisibility} aria-label='toggle confirm password visibility'>
+                          {isConfirmVisible ? <Eye className='text-2xl text-default-400 pointer-events-none' /> : <EyeOff className='text-2xl text-default-400 pointer-events-none' />}
+                        </button>
+                      }
+                      {...field}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <Button isDisabled={loading} color='primary' type='submit' endContent={loading && <Spinner size='sm' color='default' />} className='w-full h-14 rounded-sm font-bold'>
+              Get started
+            </Button>
+            <p className='text-xs text-muted-foreground'>By proceeding, I agree to UB's Terms of Use and acknowledge that I have read the Privacy Policy.</p>
+          </form>
+        </Form>
+      </div>
+    </div>
+  )
+}
+
+export default SignUpForm

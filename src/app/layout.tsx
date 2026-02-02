@@ -1,14 +1,19 @@
 import { Metadata } from 'next'
-import * as React from 'react'
+import { Manrope } from 'next/font/google'
+import { Suspense } from 'react'
 
 import '@/styles/globals.css'
 
-import { SiteFooter } from '@/components/layout/SiteFooter'
-import SiteHeader from '@/components/layout/SiteHeader'
-import { Toaster } from '@/components/ui/toaster'
+import LoadingComponent from '@/components/LoadingComponent'
 
 import { siteConfig } from '@/constant/config/site'
 import AppProvider from '@/providers/AppProvider'
+
+const manrope = Manrope({
+  subsets: ['latin'],
+  weight: ['200', '300', '400', '500', '600', '700', '800'],
+  variable: '--font-manrope',
+})
 
 // !STARTERCONF Change these default meta
 // !STARTERCONF Look at @/constant/config to change them
@@ -47,16 +52,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html suppressHydrationWarning>
+    <html className={manrope.variable} suppressHydrationWarning>
       <body className='dark min-h-screen bg-background font-sans antialiased'>
         <AppProvider>
-          <div className='mx-auto relative flex flex-col min-h-screen w-full min-[1800px]:max-w-[1536px]'>
-            <SiteHeader />
-            <main className='flex-1'>{children}</main>
-            <SiteFooter />
+          <div className='mx-auto relative flex flex-col min-h-screen w-full'>
+            <Suspense fallback={<LoadingComponent />}>{children}</Suspense>
           </div>
         </AppProvider>
-        <Toaster />
       </body>
     </html>
   )

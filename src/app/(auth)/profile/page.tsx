@@ -1,3 +1,3 @@
-export default function ProfilePage() {
-  return <div>Profile Page</div>
+export default async function ProfilePage() {
+  return <div>Profile Page:</div>
 }

@@ -36,7 +36,7 @@ export function CommandMenu() {
 
   return (
     <>
-      <SearchBar onClick={() => setOpen(true)} />
+      <SearchBar />
       <CommandDialog open={open} onOpenChange={setOpen}>
         <CommandInput placeholder='Type a command or search...' />
         <CommandList>
