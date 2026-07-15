@@ -39,31 +39,24 @@ export default function SearchBar() {
     }
   }
   return pathname !== '/search' ? (
-    <>
-      <div className='sm:hidden'>
-        <button className='transition-opacity p-1 hover:opacity-80 rounded-full cursor-pointer outline-none'>
-          <SearchIcon className='mt-px text-default-600 dark:text-default-500' size={20} />
-        </button>
-      </div>
-      <div className='hidden sm:flex'>
-        <Input
-          classNames={{
-            base: 'max-w-96 h-10',
-            mainWrapper: 'h-full',
-            input: 'text-small',
-            inputWrapper: 'h-full font-normal text-default-500 bg-default-400/20 dark:bg-default-500/20',
-          }}
-          placeholder='Type to search...'
-          size='sm'
-          className='w-96'
-          startContent={<SearchIcon size={18} />}
-          type='search'
-          value={inputValue}
-          onValueChange={setInputValue} // HeroUI dùng onValueChange thay vì onChange
-          onKeyDown={handleKeyDown}
-        />
-      </div>
-    </>
+    <div className='flex-1 w-full sm:max-w-96 mr-2 sm:mr-0'>
+      <Input
+        classNames={{
+          base: 'w-full h-10',
+          mainWrapper: 'h-full',
+          input: 'text-small',
+          inputWrapper: 'h-full font-normal text-default-500 bg-default-400/20 dark:bg-default-500/20',
+        }}
+        placeholder='Search...'
+        size='sm'
+        className='w-full'
+        startContent={<SearchIcon size={18} />}
+        type='search'
+        value={inputValue}
+        onValueChange={setInputValue}
+        onKeyDown={handleKeyDown}
+      />
+    </div>
   ) : null
 }
 
