@@ -9,7 +9,7 @@ import { MovieItem } from '@/types/movie'
 export default function MovieInformation({ movie }: { movie: MovieItem }) {
   return (
     <Card shadow='none'>
-      <CardBody className='space-y-6 py-10 px-8'>
+      <CardBody className='space-y-6 p-4 sm:p-6 lg:py-10 lg:px-8'>
         <div className='space-y-3'>
           <div className='flex items-center gap-2 text-white/60'>
             <Calendar size={18} />
@@ -25,7 +25,7 @@ export default function MovieInformation({ movie }: { movie: MovieItem }) {
           </div>
           <div className='flex flex-wrap gap-2'>
             {movie?.country.map((country, key) => (
-              <Button key={key} size='sm' variant='outline'>
+              <Button key={key} size='sm' variant='outline' className='h-auto max-w-full whitespace-normal break-words py-2'>
                 {country.name}
               </Button>
             ))}
@@ -41,7 +41,7 @@ export default function MovieInformation({ movie }: { movie: MovieItem }) {
             {movie?.tmdb && (
               <div className='flex flex-col bg-[#121212] border-[#27272a] border-1 rounded-md p-3'>
                 <div>IMDb</div>
-                <div className='flex gap-2 items-center my-1'>
+                <div className='flex flex-wrap gap-2 items-center my-1'>
                   <Rating value={Number((movie?.tmdb?.vote_average / 2).toFixed(1))} precision={0.1} /> {Number(movie?.tmdb?.vote_average / 2).toFixed(1)}
                 </div>
               </div>
@@ -56,7 +56,7 @@ export default function MovieInformation({ movie }: { movie: MovieItem }) {
           </div>
           <div className='flex flex-wrap gap-2'>
             {movie?.category.map((category, key) => (
-              <Button key={key} size='sm' variant='outline'>
+              <Button key={key} size='sm' variant='outline' className='h-auto max-w-full whitespace-normal break-words py-2'>
                 {category.name}
               </Button>
             ))}
@@ -71,8 +71,8 @@ export default function MovieInformation({ movie }: { movie: MovieItem }) {
           <div className='flex w-full gap-2'>
             {movie?.tmdb && (
               <div className='flex w-full gap-3 bg-[#121212] border-[#27272a] border-1 rounded-md p-3'>
-                <Avatar radius='sm' className='w-14 h-14 text-large' src='https://i.pravatar.cc/150?u=a04258114e29026708c' />
-                <div className='flex flex-col justify-center'>
+                <Avatar radius='sm' className='w-14 h-14 shrink-0 text-large' src='https://i.pravatar.cc/150?u=a04258114e29026708c' />
+                <div className='min-w-0 flex flex-col justify-center break-words'>
                   <div>{movie?.director?.[0]}</div>
                   <div className='text-white/60'>From Japan</div>
                 </div>
