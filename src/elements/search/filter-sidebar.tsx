@@ -1,6 +1,9 @@
 'use client'
 import { Accordion, AccordionItem, Button, Checkbox, CheckboxGroup, type Selection, Skeleton } from '@heroui/react'
+import { ChevronDown, SlidersHorizontal } from 'lucide-react'
 import { Suspense, useEffect, useState } from 'react'
+
+import { cn } from '@/lib/utils'
 
 import CountrySelector from '@/elements/search/country-selector'
 import GenresSelector from '@/elements/search/genres-selector'
@@ -46,6 +49,7 @@ const parseToArray = (str?: string): string[] => {
 }
 
 export default function FilterSidebar({ values, onFilter, loading }: FilterSidebarProps) {
+  const [isExpanded, setIsExpanded] = useState(false)
   const [selectedKeys, setSelectedKeys] = useState<Selection>(new Set())
 
   const [selectedGenres, setSelectedGenres] = useState<Selection>(new Set())
@@ -68,6 +72,7 @@ export default function FilterSidebar({ values, onFilter, loading }: FilterSideb
         language,
         year: selectedYear,
       })
+      setIsExpanded(false)
     }
   }
 
@@ -95,41 +100,52 @@ export default function FilterSidebar({ values, onFilter, loading }: FilterSideb
 
   return (
     <div className='flex flex-col gap-4'>
-      <Accordion showDivider={false} selectionMode='multiple' itemClasses={{ base: 'mt-0', trigger: 'pb-2' }} selectedKeys={selectedKeys} onSelectionChange={setSelectedKeys}>
-        <AccordionItem key='year' aria-label='Year' title='Year'>
-          <YearSelector value={selectedYear} onChange={setSelectedYear} />
-        </AccordionItem>
-        <AccordionItem key='type' aria-label='Type' title='Type'>
-          <CheckboxGroup name='type' value={selectedTypes} onValueChange={setSelectedTypes}>
-            {typeListOptions.map((option) => (
-              <Checkbox key={option.value} value={option.value}>
-                {option.label}
-              </Checkbox>
-            ))}
-          </CheckboxGroup>
-        </AccordionItem>
-        <AccordionItem key='genres' aria-label='Genres' title='Genres'>
-          <Suspense fallback={<Skeleton className='h-10 w-full rounded-lg' />}>
-            <GenresSelector value={selectedGenres} onChange={setSelectedGenres} />
-          </Suspense>
-        </AccordionItem>
-        <AccordionItem key='countries' aria-label='Country' title='Countries'>
-          <CountrySelector value={selectedCountries} onChange={setSelectedCountries} />
-        </AccordionItem>
-        <AccordionItem key='language' aria-label='Language' title='Language'>
-          <CheckboxGroup value={selectedLanguages} onValueChange={setSelectedLanguages}>
-            {languageOptions.map((option) => (
-              <Checkbox key={option.value} value={option.value}>
-                {option.label}
-              </Checkbox>
-            ))}
-          </CheckboxGroup>
-        </AccordionItem>
-      </Accordion>
-      {/* {filterActionContent} */}
-      <Button isLoading={loading} color='primary' onPress={handleSubmit} className='font-semibold'>
-        Filter
+      <Button
+        className='w-full justify-between font-semibold md:hidden'
+        variant='bordered'
+        startContent={<SlidersHorizontal size={18} />}
+        endContent={<ChevronDown size={18} className={cn('transition-transform', isExpanded && 'rotate-180')} />}
+        onPress={() => setIsExpanded((expanded) => !expanded)}
+      >
+        Filters
       </Button>
+      <div className={cn('flex-col gap-4 md:flex', isExpanded ? 'flex' : 'hidden')}>
+        <Accordion showDivider={false} selectionMode='multiple' itemClasses={{ base: 'mt-0', trigger: 'pb-2' }} selectedKeys={selectedKeys} onSelectionChange={setSelectedKeys}>
+          <AccordionItem key='year' title='Year'>
+            <YearSelector value={selectedYear} onChange={setSelectedYear} />
+          </AccordionItem>
+          <AccordionItem key='type' title='Type'>
+            <CheckboxGroup name='type' value={selectedTypes} onValueChange={setSelectedTypes}>
+              {typeListOptions.map((option) => (
+                <Checkbox key={option.value} value={option.value}>
+                  {option.label}
+                </Checkbox>
+              ))}
+            </CheckboxGroup>
+          </AccordionItem>
+          <AccordionItem key='genres' title='Genres'>
+            <Suspense fallback={<Skeleton className='h-10 w-full rounded-lg' />}>
+              <GenresSelector value={selectedGenres} onChange={setSelectedGenres} />
+            </Suspense>
+          </AccordionItem>
+          <AccordionItem key='countries' title='Countries'>
+            <CountrySelector value={selectedCountries} onChange={setSelectedCountries} />
+          </AccordionItem>
+          <AccordionItem key='language' title='Language'>
+            <CheckboxGroup value={selectedLanguages} onValueChange={setSelectedLanguages}>
+              {languageOptions.map((option) => (
+                <Checkbox key={option.value} value={option.value}>
+                  {option.label}
+                </Checkbox>
+              ))}
+            </CheckboxGroup>
+          </AccordionItem>
+        </Accordion>
+        {/* {filterActionContent} */}
+        <Button isLoading={loading} color='primary' onPress={handleSubmit} className='font-semibold'>
+          Filter
+        </Button>
+      </div>
     </div>
   )
 }

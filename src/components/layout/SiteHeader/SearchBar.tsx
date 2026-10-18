@@ -39,7 +39,7 @@ export default function SearchBar() {
     }
   }
   return pathname !== '/search' ? (
-    <div className='flex-1 w-full sm:max-w-96 mr-2 sm:mr-0'>
+    <div className='min-w-0 flex-1 w-full md:max-w-96'>
       <Input
         classNames={{
           base: 'w-full h-10',

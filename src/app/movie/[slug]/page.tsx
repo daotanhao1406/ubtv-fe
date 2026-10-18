@@ -11,16 +11,16 @@ export default async function MovieDetailsPage({ params }: { params: Promise<{ s
   return (
     <div className='relative font-manrope'>
       <MovieHero movie={movie?.movie} />
-      <div className='grid grid-cols-3 gap-12 px-6 pt-10'>
-        <div className='col-span-2'>
+      <div className='grid grid-cols-1 gap-6 px-4 pt-6 md:px-6 md:pt-10 lg:grid-cols-3 lg:gap-12'>
+        <div className='min-w-0 lg:col-span-2'>
           <EpisodesList slug={slug} episodes={movie?.episodes?.[0]?.server_data} />
         </div>
-        <div className='col-span-1'>
+        <div className='min-w-0'>
           <MovieInformation movie={movie?.movie} />
         </div>
       </div>
 
-      <div className='h-20' />
+      <div className='h-12 md:h-20' />
     </div>
   )
 }
