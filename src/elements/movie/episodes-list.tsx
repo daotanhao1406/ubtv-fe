@@ -22,10 +22,10 @@ export default function EpisodesList({ slug, episodes, selectedEpisodeSlug }: Ep
   return (
     <div className='font-manrope'>
       <Card shadow='none'>
-        <CardBody className='p-10 flex flex-col'>
+        <CardBody className='p-4 sm:p-6 lg:p-10 flex flex-col'>
           <div className='text-white/60'>Episodes</div>
 
-          <div className='flex flex-wrap gap-2.5 mt-6'>
+          <div className='flex flex-wrap gap-2.5 mt-4 sm:mt-6'>
             {/* {episodes.map((episode) => (
               <Button key={episode.slug} variant='ghost' radius='sm' isIconOnly className='text-sm border-1' size='sm'>
                 {getEpisodeNumber(episode.slug)}

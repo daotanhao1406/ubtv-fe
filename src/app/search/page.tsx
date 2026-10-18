@@ -6,6 +6,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation' // Th�
 import { useCallback, useEffect, useState } from 'react'
 
 import { sanitizeInput } from '@/lib/utils/sanitizeInput'
+import useIsMobile from '@/hooks/useIsMobile'
 
 import { MovieSection } from '@/app/home/partials/movie-section'
 import FilterSidebar, { FilterValues } from '@/elements/search/filter-sidebar'
@@ -20,6 +21,7 @@ export default function SearchPage() {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const isMobile = useIsMobile()
 
   const [data, setData] = useState<any>()
   const [loading, setLoading] = useState<boolean>()
@@ -109,18 +111,17 @@ export default function SearchPage() {
   }
 
   return (
-    <div className='pl-6 pr-4'>
+    <div className='px-4 md:pl-6'>
       {/* Header */}
       <div className='mt-8'>
         <Input
           classNames={{
-            base: 'max-w-96 h-10 bg-transparent',
+            base: 'w-full md:max-w-96 h-10 bg-transparent',
             mainWrapper: 'h-full',
             inputWrapper: 'h-full font-normal text-default-500 bg-default-400/20 dark:bg-default-500/20',
           }}
           placeholder='Type to search...'
           size='lg'
-          className='w-96'
           startContent={<SearchIcon size={18} />}
           type='search'
           value={inputValue}
@@ -132,8 +133,8 @@ export default function SearchPage() {
       </div>
 
       {/* Search result */}
-      <div className='flex mt-4'>
-        <div className='w-52'>
+      <div className='mt-4 flex flex-col gap-4 md:flex-row md:gap-5'>
+        <div className='w-full md:w-52 md:shrink-0'>
           {/* Bạn nên truyền defaultValues vào Sidebar để khi reload nó tích đúng ô */}
           <FilterSidebar
             loading={loading}
@@ -146,11 +147,13 @@ export default function SearchPage() {
             }}
           />
         </div>
-        <div className='flex-1'>
-          <MovieSection loading={loading} className='py-3 !px-0 !pl-5' movies={data?.data?.items} title='' />
+        <div className='min-w-0 flex-1'>
+          <MovieSection loading={loading} className='py-3 px-0 md:px-0' movies={data?.data?.items} title='' />
           <Pagination
-            className='justify-items-end pr-6'
+            className='flex justify-center md:justify-end md:pr-6'
             variant='light'
+            isCompact={isMobile}
+            size={isMobile ? 'sm' : 'md'}
             showControls
             page={data?.data?.params?.pagination?.currentPage}
             total={data?.data?.params?.pagination?.totalPages}
