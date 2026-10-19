@@ -2,6 +2,9 @@
   "name": "ubtv-fe",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "24.x"
+  },
   "author": {
     "name": "daotanhao",
     "email": "daotanhao9h@gmail.com"
