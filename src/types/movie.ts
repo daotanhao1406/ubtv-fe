@@ -43,8 +43,8 @@ export interface MovieItem {
   director?: string[]
   actor?: string[]
 
-  poster_url: string
-  thumb_url: string
+  poster_url?: string | null
+  thumb_url?: string | null
 
   sub_docquyen: boolean
   chieurap: boolean

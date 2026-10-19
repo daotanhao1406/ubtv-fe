@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { MovieItem } from '@/types/movie'
 
 export function MovieCard({ item }: { item: MovieItem }) {
-  const imageSrc = item?.poster_url?.includes('http') ? item?.poster_url : `https://phimimg.com/${item?.poster_url}`
+  const imageSrc = item?.poster_url ? (item.poster_url.includes('http') ? item.poster_url : `https://phimimg.com/${item.poster_url}`) : null
 
   return (
     <Card
@@ -23,7 +23,7 @@ export function MovieCard({ item }: { item: MovieItem }) {
 
       {/* Video/Image Container */}
       <div className='relative h-full w-full'>
-        <Image src={imageSrc} alt={item?.name} fill className='h-full w-full object-cover' />
+        {imageSrc ? <Image src={imageSrc} alt={item?.name} fill className='h-full w-full object-cover' /> : null}
 
         {/* Video Overlay */}
         {/* {videoUrl && isHovering && <video src={videoUrl} autoPlay muted playsInline className='absolute inset-0 h-full w-full object-cover' />} */}

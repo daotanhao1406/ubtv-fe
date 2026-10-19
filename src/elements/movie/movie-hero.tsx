@@ -31,7 +31,7 @@ export default function MovieHero({ movie }: VideoSlideProps) {
     <div className='relative flex min-h-[80svh] w-full items-end overflow-hidden pt-24 font-manrope md:pt-28'>
       {/* Background Video */}
       {/* <video src={movie.videoUrl} autoPlay muted className='object-cover absolute inset-0 h-full w-full' /> */}
-      <Image src={movie?.thumb_url} fill sizes='100vw' alt={movie.name} className='object-cover absolute inset-0 h-full w-full' />
+      {movie.thumb_url ? <Image src={movie.thumb_url} fill sizes='100vw' alt={movie.name} className='object-cover absolute inset-0 h-full w-full' /> : null}
 
       {/* Overlay */}
       <div className='absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent' />
