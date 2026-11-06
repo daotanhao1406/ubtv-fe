@@ -1,45 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-// 1. Specify protected and public routes
-const protectedRoutes = ['/profile']
-export const publicRoutes = ['/login', '/signup', '/forgot-password', '/email-verification', 'reset-password']
+const middleware = (request: NextRequest) => {
+  const response = NextResponse.next()
 
-export default async function middleware(request: NextRequest) {
-  // 2. Check if the current route is protected or public
-  const path = request.nextUrl.pathname
-  const isProtectedRoute = protectedRoutes.includes(path)
-  const isPublicRoute = publicRoutes.includes(path)
-
-  // 3. Decrypt the session from the cookie
-  const accessToken = request.cookies.get('accessToken')?.value
-  // console.log("🚀 ~ middleware ~ accessToken:", accessToken)
-  // console.log("🚀 ~ middleware ~ accessToken:",  request.cookies.get('refreshToken')?.value)
-
-  // 4. Redirect
-  if (isPublicRoute && accessToken) {
-    return NextResponse.redirect(new URL('/', request.nextUrl))
+  // These cookies belong to the previous flow. The backend owns ubtv.refresh;
+  // the client layout checks authentication after restoring the in-memory session.
+  for (const name of ['accessToken', 'refreshToken']) {
+    if (request.cookies.has(name)) response.cookies.delete(name)
   }
 
-  if (isProtectedRoute && !accessToken) {
-    return NextResponse.redirect(new URL('/login', request.nextUrl))
-  }
-
-  // if (isPublicRoute && accessToken && !request.nextUrl.pathname.startsWith('/dashboard')) {
-  //   return NextResponse.redirect(new URL('/dashboard', request.nextUrl));
-  // }
-
-  return NextResponse.next()
+  return response
 }
 
+export default middleware
+
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
-     */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
 }
