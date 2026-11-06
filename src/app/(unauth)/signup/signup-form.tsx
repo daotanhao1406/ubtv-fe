@@ -1,21 +1,30 @@
 'use client'
 
-import { Button, Input, Spinner } from '@heroui/react'
+import { addToast, Button, Form as HeroForm, Input, Spinner } from '@heroui/react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Eye, EyeOff } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
-import { handleErrorApi } from '@/lib/helper'
+import { AuthHttpError } from '@/lib/auth-http'
 
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 
 import { useAuth } from '@/providers/AuthProvider'
 import { SignUpBody, SignUpBodyType } from '@/schema/auth.schema'
 
+const retryDelay = (value: string | null) => {
+  if (!value) return 60
+  const seconds = Number(value)
+  if (Number.isFinite(seconds)) return Math.max(60, Math.ceil(seconds))
+  const delay = Math.ceil((Date.parse(value) - Date.now()) / 1000)
+  return Number.isFinite(delay) ? Math.max(60, delay) : 60
+}
+
 const SignUpForm = () => {
   const [loading, setLoading] = useState(false)
+  const [retryWait, setRetryWait] = useState(0)
   const [isVisible, setIsVisible] = useState(false)
   const [isConfirmVisible, setIsConfirmVisible] = useState(false)
   const { register } = useAuth()
@@ -29,52 +38,62 @@ const SignUpForm = () => {
       confirmPassword: '',
     },
   })
-  const usernameState = form.getFieldState('username')
-  const emailState = form.getFieldState('email')
-  const passwordState = form.getFieldState('password')
-  const confirmPasswordState = form.getFieldState('confirmPassword')
-  const password = form.watch('password')
-  const passwordErrors: string[] = []
+  const { errors } = form.formState
+  const countingDown = retryWait > 0
 
-  if (password.length < 6) {
-    passwordErrors.push('Password must be 6 characters or more.')
-  }
+  useEffect(() => {
+    if (!countingDown) return
+    const timer = window.setInterval(() => setRetryWait((seconds) => Math.max(0, seconds - 1)), 1000)
+    return () => window.clearInterval(timer)
+  }, [countingDown])
+
   const toggleVisibility = () => setIsVisible(!isVisible)
   const toggleConfirmVisibility = () => setIsConfirmVisible(!isConfirmVisible)
   const onSubmit = async (values: SignUpBodyType) => {
+    if (loading || retryWait > 0) return
     setLoading(true)
-    await register(values)
-      .then(() => {
-        // addToast({
-        //   title: 'Sign Up',
-        //   description: 'Sign Up successfully!',
-        //   timeout: 3000,
-        //   shouldShowTimeoutProgress: true,
-        //   color: 'success',
-        // })
-        router.push(`/email-verification?type=register&email=${values.email}&username=${values.username}`)
-        router.refresh()
+    try {
+      const { data } = await register({ name: values.username, email: values.email, password: values.password })
+      addToast({
+        title: 'Account created',
+        description: data.verificationEmailSent ? 'Check your inbox and spam folder for a verification code.' : 'Your account was created, but the verification email could not be sent. Wait 60 seconds, then choose Click to resend.',
+        color: data.verificationEmailSent ? 'success' : 'warning',
+        timeout: data.verificationEmailSent ? 5000 : 10000,
+        shouldShowTimeoutProgress: true,
       })
-      .catch((error) => {
-        handleErrorApi({ error })
+      router.push(`/email-verification?${new URLSearchParams({ type: 'register', email: data.email, registered: 'true' })}`)
+    } catch (error) {
+      const emailExists = error instanceof AuthHttpError && error.status === 409
+      if (error instanceof AuthHttpError && error.status === 429) setRetryWait(retryDelay(error.retryAfter))
+      addToast({
+        title: emailExists ? 'Email already registered' : 'Registration failed',
+        description: emailExists ? 'Log in or verify your email to continue.' : error instanceof Error ? error.message : 'Unable to register. Please try again.',
+        color: 'danger',
+        timeout: emailExists ? 10000 : 5000,
+        shouldShowTimeoutProgress: true,
+        endContent: emailExists ? (
+          <Button size='sm' variant='flat' onPress={() => router.push(`/email-verification?${new URLSearchParams({ type: 'register', email: values.email })}`)}>
+            Verify email
+          </Button>
+        ) : undefined,
       })
-      .finally(() => {
-        setLoading(false)
-      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
     <div className='flex flex-col mt-10'>
       <div className='flex w-full'>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4 w-[440px]' noValidate>
+          <HeroForm onSubmit={form.handleSubmit(onSubmit)} className='block space-y-4 w-[440px]' validationBehavior='aria'>
             <FormField
               control={form.control}
               name='username'
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input errorMessage={usernameState.error?.message} variant={usernameState.invalid ? 'bordered' : 'flat'} isInvalid={usernameState.invalid} className='rounded-none' type='text' label='Username' {...field} />
+                    <Input errorMessage={errors.username?.message} variant={errors.username ? 'bordered' : 'flat'} isInvalid={!!errors.username} className='rounded-none' type='text' label='Username' autoComplete='name' {...field} />
                   </FormControl>
                 </FormItem>
               )}
@@ -85,7 +104,7 @@ const SignUpForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input errorMessage={emailState.error?.message} variant={emailState.invalid ? 'bordered' : 'flat'} isInvalid={emailState.invalid} className='rounded-none' type='text' label='Email' {...field} />
+                    <Input errorMessage={errors.email?.message} variant={errors.email ? 'bordered' : 'flat'} isInvalid={!!errors.email} className='rounded-none' type='email' label='Email' autoComplete='email' {...field} />
                   </FormControl>
                 </FormItem>
               )}
@@ -97,21 +116,16 @@ const SignUpForm = () => {
                 <FormItem>
                   <FormControl>
                     <Input
-                      errorMessage={() => (
-                        <ul>
-                          {passwordErrors.map((error, i) => (
-                            <li key={i}>{error}</li>
-                          ))}
-                        </ul>
-                      )}
-                      variant={passwordState.invalid ? 'bordered' : 'flat'}
+                      errorMessage={errors.password?.message}
+                      variant={errors.password ? 'bordered' : 'flat'}
                       type={isVisible ? 'text' : 'password'}
                       label='Password'
-                      isInvalid={passwordState.invalid}
+                      isInvalid={!!errors.password}
+                      autoComplete='new-password'
                       endContent={
-                        <button className='focus:outline-none' type='button' onClick={toggleVisibility} aria-label='toggle password visibility'>
+                        <Button isIconOnly variant='light' size='sm' className='h-auto w-auto min-w-0 p-0' type='button' onPress={toggleVisibility} aria-label='toggle password visibility'>
                           {isVisible ? <Eye className='text-2xl text-default-400 pointer-events-none' /> : <EyeOff className='text-2xl text-default-400 pointer-events-none' />}
-                        </button>
+                        </Button>
                       }
                       {...field}
                     />
@@ -126,15 +140,16 @@ const SignUpForm = () => {
                 <FormItem>
                   <FormControl>
                     <Input
-                      errorMessage={confirmPasswordState.error?.message}
-                      variant={confirmPasswordState.invalid ? 'bordered' : 'flat'}
+                      errorMessage={errors.confirmPassword?.message}
+                      variant={errors.confirmPassword ? 'bordered' : 'flat'}
                       type={isConfirmVisible ? 'text' : 'password'}
                       label='Confirm Password'
-                      isInvalid={confirmPasswordState.invalid}
+                      isInvalid={!!errors.confirmPassword}
+                      autoComplete='new-password'
                       endContent={
-                        <button className='focus:outline-none' type='button' onClick={toggleConfirmVisibility} aria-label='toggle confirm password visibility'>
+                        <Button isIconOnly variant='light' size='sm' className='h-auto w-auto min-w-0 p-0' type='button' onPress={toggleConfirmVisibility} aria-label='toggle confirm password visibility'>
                           {isConfirmVisible ? <Eye className='text-2xl text-default-400 pointer-events-none' /> : <EyeOff className='text-2xl text-default-400 pointer-events-none' />}
-                        </button>
+                        </Button>
                       }
                       {...field}
                     />
@@ -142,11 +157,11 @@ const SignUpForm = () => {
                 </FormItem>
               )}
             />
-            <Button isDisabled={loading} color='primary' type='submit' endContent={loading && <Spinner size='sm' color='default' />} className='w-full h-14 rounded-sm font-bold'>
-              Get started
+            <Button isDisabled={loading || retryWait > 0} color='primary' type='submit' endContent={loading && <Spinner size='sm' color='default' />} className='w-full h-14 rounded-sm font-bold'>
+              {retryWait > 0 ? `Try again in ${retryWait}s` : 'Get started'}
             </Button>
             <p className='text-xs text-muted-foreground'>By proceeding, I agree to UB's Terms of Use and acknowledge that I have read the Privacy Policy.</p>
-          </form>
+          </HeroForm>
         </Form>
       </div>
     </div>
