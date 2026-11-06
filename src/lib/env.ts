@@ -9,7 +9,7 @@ import { z } from 'zod'
 const configSchemaEnv = z.object({
   NEXT_PUBLIC_SHOW_LOGGER: z.enum(['true', 'false']).optional(),
   NEXT_PUBLIC_DEV_URL: z.string(),
-  NEXT_PUBLIC_API_ENDPOINT: z.string(),
+  NEXT_PUBLIC_API_ENDPOINT: z.string().url(),
 })
 
 const envConfig = configSchemaEnv.safeParse({

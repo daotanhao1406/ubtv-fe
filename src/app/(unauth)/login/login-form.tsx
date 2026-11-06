@@ -10,52 +10,64 @@ import GoogleIcon from 'public/svg/google.svg'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
-import { handleErrorApi } from '@/lib/helper'
+import { AuthHttpError } from '@/lib/auth-http'
 
 import { Button as ShadcnButton } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 
 import { useAuth } from '@/providers/AuthProvider'
-import { LoginBody, LoginBodyType } from '@/schema/auth.schema'
+import { LoginInput, LoginInputSchema } from '@/schema/auth-api.schema'
 
-const LoginForm = () => {
+type LoginFormProps = { email: string; redirectTo: string }
+
+const LoginForm = ({ email, redirectTo }: LoginFormProps) => {
   const [loading, setLoading] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
-  const { login } = useAuth()
+  const { login, isInitializing, isLoggingOut } = useAuth()
   const router = useRouter()
-  const form = useForm<LoginBodyType>({
-    resolver: zodResolver(LoginBody),
+  const form = useForm<LoginInput>({
+    resolver: zodResolver(LoginInputSchema),
     defaultValues: {
-      email: '',
+      email,
       password: '',
     },
   })
-  const emailState = form.getFieldState('email')
-  const passwordState = form.getFieldState('password')
+  const { errors } = form.formState
+  const disabled = loading || isInitializing || isLoggingOut
 
-  async function signInWithGoogle() {}
+  const signInWithGoogle = async () => {}
 
   const toggleVisibility = () => setIsVisible(!isVisible)
 
-  const onSubmit = async (values: LoginBodyType) => {
+  const onSubmit = async (values: LoginInput) => {
+    if (disabled) return
     setLoading(true)
-    await login(values)
-      .then(() => {
+    try {
+      await login(values)
+      addToast({
+        title: 'Login',
+        description: 'Login successfully!',
+        timeout: 3000,
+        shouldShowTimeoutProgress: true,
+        color: 'success',
+        icon: <LogIn />,
+      })
+      router.replace(redirectTo)
+    } catch (error) {
+      if (error instanceof AuthHttpError && error.status === 403 && error.payload.code === 'EMAIL_NOT_VERIFIED') {
+        router.push(`/email-verification?type=register&email=${encodeURIComponent(values.email)}`)
+      } else {
         addToast({
-          title: 'Login',
-          description: 'Login successfully!',
-          timeout: 3000,
+          title: 'Login failed',
+          description: error instanceof AuthHttpError && error.status === 401 ? 'Invalid email or password.' : error instanceof Error ? error.message : 'Unable to log in. Please try again.',
+          color: 'danger',
+          timeout: 5000,
           shouldShowTimeoutProgress: true,
-          color: 'success',
-          icon: <LogIn />,
         })
-        router.push('/')
-        router.refresh()
-      })
-      .catch((error) => handleErrorApi({ error }))
-      .finally(() => {
-        setLoading(false)
-      })
+      }
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -69,7 +81,7 @@ const LoginForm = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input variant={emailState.invalid ? 'bordered' : 'flat'} isInvalid={emailState.invalid} className='rounded-none' type='text' label='Email' {...field} />
+                    <Input variant={errors.email ? 'bordered' : 'flat'} isInvalid={!!errors.email} errorMessage={errors.email?.message} className='rounded-none' type='email' label='Email' autoComplete='email' {...field} />
                   </FormControl>
                 </FormItem>
               )}
@@ -81,10 +93,12 @@ const LoginForm = () => {
                 <FormItem>
                   <FormControl>
                     <Input
-                      variant={passwordState.invalid ? 'bordered' : 'flat'}
+                      variant={errors.password ? 'bordered' : 'flat'}
                       type={isVisible ? 'text' : 'password'}
                       label='Password'
-                      isInvalid={passwordState.invalid}
+                      isInvalid={!!errors.password}
+                      errorMessage={errors.password?.message}
+                      autoComplete='current-password'
                       endContent={
                         <button className='focus:outline-none' type='button' onClick={toggleVisibility} aria-label='toggle password visibility'>
                           {isVisible ? <Eye className='text-2xl text-default-400 pointer-events-none' /> : <EyeOff className='text-2xl text-default-400 pointer-events-none' />}
@@ -97,7 +111,7 @@ const LoginForm = () => {
               )}
             />
 
-            <HeroButton isDisabled={loading} color='primary' type='submit' endContent={loading ? <Spinner size='sm' color='default' /> : <ArrowRight size={20} />} className='w-full h-14 rounded-sm font-bold flex justify-between'>
+            <HeroButton isDisabled={disabled} color='primary' type='submit' endContent={loading ? <Spinner size='sm' color='default' /> : <ArrowRight size={20} />} className='w-full h-14 rounded-sm font-bold flex justify-between'>
               Login to Your Account
             </HeroButton>
           </form>

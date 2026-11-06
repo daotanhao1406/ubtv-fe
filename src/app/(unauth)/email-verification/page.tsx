@@ -9,18 +9,19 @@ import UnAuthTemplate from '@/app/(unauth)/template'
 const EmailVerificationPage = () => {
   const searchParams = useSearchParams()
   const email = searchParams.get('email') || ''
-  const type = searchParams.get('type')
+  const type = searchParams.get('type') === 'register' ? 'register' : 'resetpassword'
+  const initialResendCooldown = type === 'register' && searchParams.get('registered') === 'true' ? 60 : 0
   return (
     <UnAuthTemplate
       icon={<Mail />}
       title='Check your email'
       description={
         <>
-          We've sent you a {type === 'register' ? 'verification' : 'password reset'} code to <br /> <span className='font-bold'>{email}</span>
+          {type === 'register' ? 'Enter the verification code for' : "We've sent you a password reset code to"} <br /> <span className='font-bold'>{email}</span>
         </>
       }
     >
-      <EmailVerificationForm />
+      <EmailVerificationForm key={`${type}:${email}:${initialResendCooldown}`} email={email} type={type} initialResendCooldown={initialResendCooldown} />
     </UnAuthTemplate>
   )
 }
