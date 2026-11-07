@@ -1,41 +1,42 @@
 'use client'
 
-import { Button as HeroButton, Input } from '@heroui/react'
+import { addToast, Button as HeroButton, Input } from '@heroui/react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
-import { handleErrorApi } from '@/lib/helper'
+import { AuthHttpError } from '@/lib/auth-http'
 
 import { Button as ShadcnButton } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 
-import { useAuth } from '@/providers/AuthProvider'
-import { ForgotPasswordBody, ForgotPasswordBodyType } from '@/schema/auth.schema'
+import ubtvAuthApi from '@/api/ubtv-auth'
+import { ForgotPasswordInput, ForgotPasswordInputSchema } from '@/schema/auth-api.schema'
 
 const ForgotPasswordForm = () => {
   const router = useRouter()
-  const { forgotPassword } = useAuth()
   const [loading, setLoading] = useState(false)
-  const form = useForm<ForgotPasswordBodyType>({
-    resolver: zodResolver(ForgotPasswordBody),
+  const form = useForm<ForgotPasswordInput>({
+    resolver: zodResolver(ForgotPasswordInputSchema),
     defaultValues: {
       email: '',
     },
   })
-  const emailState = form.getFieldState('email')
+  const { errors } = form.formState
 
-  const onSubmit = async (values: ForgotPasswordBodyType) => {
+  const onSubmit = async (values: ForgotPasswordInput) => {
+    if (loading) return
     setLoading(true)
-    await forgotPassword(values)
+    await ubtvAuthApi
+      .forgotPassword(values)
       .then(() => {
-        router.push(`/email-verification?type=resetpassword&email=${values.email}`)
+        router.push(`/email-verification?${new URLSearchParams({ type: 'resetpassword', email: values.email, sent: 'true' })}`)
         router.refresh()
       })
       .catch((error) => {
-        handleErrorApi({ error })
+        addToast({ title: 'Unable to request a reset code', description: error instanceof AuthHttpError ? error.message : 'Unable to connect. Please try again.', color: 'danger' })
       })
       .finally(() => {
         setLoading(false)
@@ -52,12 +53,12 @@ const ForgotPasswordForm = () => {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input errorMessage='Please enter a valid email' variant={emailState.invalid ? 'bordered' : 'flat'} isInvalid={emailState.invalid} className='rounded-none' type='text' label='Enter your email' {...field} />
+                  <Input errorMessage={errors.email?.message} variant={errors.email ? 'bordered' : 'flat'} isInvalid={!!errors.email} className='rounded-none' type='email' autoComplete='email' label='Enter your email' {...field} />
                 </FormControl>
               </FormItem>
             )}
           />
-          <HeroButton isLoading={loading} color='primary' type='submit' className='w-full h-14 font-bold'>
+          <HeroButton isLoading={loading} isDisabled={loading} color='primary' type='submit' className='w-full h-14 font-bold'>
             Reset password
           </HeroButton>
         </form>

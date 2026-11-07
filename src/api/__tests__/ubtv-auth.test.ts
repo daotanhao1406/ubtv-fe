@@ -13,8 +13,36 @@ const user = { id: 'user-1', name: 'User', email: 'user@example.com', emailVerif
 const session = { accessToken: 'access-token', expiresIn: 900, user }
 const registrationForm = { name: 'User', email: user.email, password: '  secret  ', confirmPassword: '  secret  ', username: 'legacy-user' }
 const verificationForm = { email: user.email, code: '012345', username: 'legacy-user', otp: '1234' }
+const resetForm = { email: user.email, resetToken: 'reset+token&value', password: '  secret  ', confirmPassword: '  secret  ' }
 
 const contracts = [
+  {
+    name: 'forgotPassword',
+    path: '/auth/forgot-password',
+    method: 'POST',
+    body: { email: user.email },
+    status: 200,
+    data: { message: 'If eligible, a reset code will be sent' },
+    call: () => ubtvAuthApi.forgotPassword(registrationForm),
+  },
+  {
+    name: 'verifyResetPassword',
+    path: '/auth/verify-reset-password',
+    method: 'POST',
+    body: { email: user.email, code: '012345' },
+    status: 200,
+    data: { resetToken: resetForm.resetToken },
+    call: () => ubtvAuthApi.verifyResetPassword(verificationForm),
+  },
+  {
+    name: 'resetPassword',
+    path: '/auth/reset-password',
+    method: 'POST',
+    body: { email: user.email, resetToken: resetForm.resetToken, password: resetForm.password },
+    status: 200,
+    data: { message: 'Password reset successfully' },
+    call: () => ubtvAuthApi.resetPassword(resetForm),
+  },
   {
     name: 'register',
     path: '/auth/register',
@@ -117,6 +145,25 @@ describe('ubtvAuthApi backend contract', () => {
 
     expect(error).toBeInstanceOf(AuthHttpError)
     expect(error).toMatchObject({ status: 403, payload })
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
+  it.each([400, 401, 403, 410, 422, 429])('passes reset verification failures through without retries: %s', async (status) => {
+    const payload = { statusCode: status, message: 'Reset code is expired, invalid, or locked' }
+    fetchMock.mockResolvedValue(Response.json(payload, { status, headers: { 'Retry-After': '90' } }))
+
+    const error = await ubtvAuthApi.verifyResetPassword({ email: user.email, code: '012345' }).catch((error: unknown) => error)
+
+    expect(error).toBeInstanceOf(AuthHttpError)
+    expect(error).toMatchObject({ status, payload, retryAfter: '90' })
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not retry a reset token after the backend rejects it as expired or used', async () => {
+    const payload = { statusCode: 400, message: 'Reset token is expired or already used' }
+    fetchMock.mockResolvedValue(Response.json(payload, { status: 400 }))
+
+    await expect(ubtvAuthApi.resetPassword(resetForm)).rejects.toMatchObject({ status: 400, payload })
     expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 })

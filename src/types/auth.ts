@@ -25,3 +25,7 @@ export interface VerifyEmailData {
 export interface AuthMessageData {
   message: string
 }
+
+export interface VerifyResetPasswordData {
+  resetToken: string
+}

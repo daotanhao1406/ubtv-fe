@@ -14,7 +14,7 @@ const SuccessfulPasswordResetPage = () => {
       title='Password reset'
       description={
         <>
-          Your password has been successfully reset. <br /> Click below to log in magically.
+          Your password has been successfully reset. <br /> Your previous sessions have ended. Please log in again.
         </>
       }
     >
