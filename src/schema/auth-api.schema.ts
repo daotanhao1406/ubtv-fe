@@ -35,7 +35,22 @@ export const ResendVerificationInputSchema = z
   })
   .strict()
 
+export const ForgotPasswordInputSchema = ResendVerificationInputSchema
+
+export const VerifyResetPasswordInputSchema = VerifyEmailInputSchema
+
+export const ResetPasswordInputSchema = z
+  .object({
+    email: emailSchema,
+    resetToken: z.string().min(1, { message: 'Reset token is missing. Please request a new code.' }),
+    password: passwordSchema,
+  })
+  .strict()
+
 export type LoginInput = z.infer<typeof LoginInputSchema>
 export type RegisterInput = z.infer<typeof RegisterInputSchema>
 export type VerifyEmailInput = z.infer<typeof VerifyEmailInputSchema>
 export type ResendVerificationInput = z.infer<typeof ResendVerificationInputSchema>
+export type ForgotPasswordInput = z.infer<typeof ForgotPasswordInputSchema>
+export type VerifyResetPasswordInput = z.infer<typeof VerifyResetPasswordInputSchema>
+export type ResetPasswordInput = z.infer<typeof ResetPasswordInputSchema>

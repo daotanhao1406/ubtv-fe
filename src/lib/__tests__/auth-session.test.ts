@@ -36,6 +36,37 @@ const setup = () => {
 }
 
 describe('auth session', () => {
+  it('clears a session locally after a password reset and requires an explicit login', async () => {
+    const { api, session } = setup()
+    await session.login(credentials)
+
+    session.clearSession()
+
+    await expect(session.fetchMe()).rejects.toThrow('Please sign in again')
+    await expect(session.refresh()).rejects.toThrow('Please sign in again')
+    expect(api.logout).not.toHaveBeenCalled()
+    expect(api.me).not.toHaveBeenCalled()
+    expect(api.refresh).not.toHaveBeenCalled()
+
+    await session.login(credentials)
+    await expect(session.fetchMe()).resolves.toEqual(user)
+  })
+
+  it('ignores an in-flight refresh after the session is cleared locally', async () => {
+    const { api, session } = setup()
+    const pending = deferred<ApiResponse<AccessTokenData>>()
+    api.refresh.mockReturnValueOnce(pending.promise)
+    const refresh = session.refresh().catch((error: unknown) => error)
+    await tick()
+
+    session.clearSession()
+    pending.resolve(tokens('stale-token'))
+
+    await expect(refresh).resolves.toEqual(new Error('Authentication session changed'))
+    await expect(session.fetchMe()).rejects.toThrow('Please sign in again')
+    expect(api.refresh).toHaveBeenCalledTimes(1)
+  })
+
   it('returns the login user and uses the token in memory for profile requests', async () => {
     const { api, session } = setup()
     await expect(session.login(credentials)).resolves.toEqual(user)

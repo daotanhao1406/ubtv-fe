@@ -45,3 +45,9 @@ If there is no `.codegraph/` directory, skip CodeGraph entirely — indexing is 
 - Think through the UI/UX before adding or changing an interface: user intent, clear actions, accessibility, and loading, error, and success feedback. Preserve the existing visual style unless a redesign is requested.
 - Prefer components from `@heroui/react` for interface elements. Minimize direct use of native HTML elements such as `button`, `form`, `p`, and `div` when a suitable HeroUI component exists.
 - Use native HTML where needed for semantics or simple layout without a suitable HeroUI equivalent; do not add unnecessary components or wrappers just to replace an HTML tag.
+
+## Frontend: error notifications use toast
+
+- Display error notifications using HeroUI `addToast` with `color: 'danger'`, including API failures, invalid OTP codes, and validation errors.
+- Do not render error message text below inputs or in inline error blocks. Inputs may still use invalid styling for visual feedback.
+- Keep error messages clear and actionable, and preserve useful backend error details.

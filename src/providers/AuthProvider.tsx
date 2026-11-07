@@ -10,7 +10,7 @@ import { CustomResponseType } from '@/api'
 import authApiRequest from '@/api/auth'
 import ubtvAuthApi from '@/api/ubtv-auth'
 import { ForgotPasswordBodyType, ResetPasswordBodyType } from '@/schema/auth.schema'
-import type { LoginInput } from '@/schema/auth-api.schema'
+import type { LoginInput, ResetPasswordInput } from '@/schema/auth-api.schema'
 
 import type { AuthUser } from '@/types/auth'
 
@@ -25,6 +25,7 @@ type AuthContextType = {
   forgotPassword: (body: ForgotPasswordBodyType) => Promise<void>
   resetPassword: (body: ResetPasswordBodyType) => Promise<void>
   confirmResetPasswordOtp: (body: { otp: string; email: string }) => Promise<CustomResponseType>
+  completePasswordReset: (body: ResetPasswordInput) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType)
@@ -80,7 +81,14 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
-  // Password recovery stays on the existing API until the backend supports it.
+  const completePasswordReset = async (body: ResetPasswordInput) => {
+    await ubtvAuthApi.resetPassword(body)
+    getAuthSession().clearSession()
+    setUser(null)
+    setLogoutError(false)
+  }
+
+  // Keep legacy password recovery methods for callers pending deprecation.
   const confirmResetPasswordOtp = (body: { otp: string; email: string }) => authApiRequest.confirmResetPasswordOtp(body)
   const forgotPassword = async (body: ForgotPasswordBodyType) => {
     await authApiRequest.forgotPassword(body)
@@ -90,7 +98,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, isInitializing, isLoggingOut, restoreSession, login, logout, register: ubtvAuthApi.register, confirmResetPasswordOtp, forgotPassword, resetPassword }}>
+    <AuthContext.Provider value={{ user, isInitializing, isLoggingOut, restoreSession, login, logout, register: ubtvAuthApi.register, confirmResetPasswordOtp, forgotPassword, resetPassword, completePasswordReset }}>
       {logoutError && (
         <div role='alert' className='flex flex-wrap items-center justify-center gap-3 bg-warning-100 p-3 text-warning-900'>
           <p>You are signed out locally. We could not confirm sign-out with the server.</p>

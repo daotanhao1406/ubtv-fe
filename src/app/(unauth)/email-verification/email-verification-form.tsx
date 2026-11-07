@@ -11,8 +11,7 @@ import { Button as ShadcnButton } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 
 import ubtvAuthApi from '@/api/ubtv-auth'
-import { useAuth } from '@/providers/AuthProvider'
-import { ResendVerificationInputSchema, VerifyEmailInputSchema } from '@/schema/auth-api.schema'
+import { ResendVerificationInputSchema, VerifyEmailInputSchema, VerifyResetPasswordInputSchema } from '@/schema/auth-api.schema'
 
 const retryDelay = (value: string | null) => {
   if (!value) return 60
@@ -30,10 +29,8 @@ type EmailVerificationFormProps = {
 
 const EmailVerificationForm = ({ email, type, initialResendCooldown = 0 }: EmailVerificationFormProps) => {
   const router = useRouter()
-  const { confirmResetPasswordOtp } = useAuth()
   const [code, setCode] = useState('')
   const [invalidCode, setInvalidCode] = useState<boolean>(false)
-  const [errorMessage, setErrorMessage] = useState('')
   const [pending, setPending] = useState(false)
   const [isResending, setIsResending] = useState(false)
   const [resendCooldown, setResendCooldown] = useState(initialResendCooldown)
@@ -50,24 +47,29 @@ const EmailVerificationForm = ({ email, type, initialResendCooldown = 0 }: Email
   }, [countingDown])
 
   const showError = (error: unknown) => {
-    setInvalidCode(error instanceof AuthHttpError && error.status === 400)
-    setErrorMessage(error instanceof AuthHttpError ? error.message : 'Unable to connect. Please try again.')
+    setInvalidCode(error instanceof AuthHttpError && [400, 401, 403, 410, 422].includes(error.status))
+    addToast({
+      title: 'Verification failed',
+      description: error instanceof AuthHttpError ? error.message : typeof error === 'string' ? error : 'Unable to connect. Please try again.',
+      color: 'danger',
+      timeout: 5000,
+      shouldShowTimeoutProgress: true,
+    })
     if (error instanceof AuthHttpError && error.status === 429) setRetryWait(retryDelay(error.retryAfter))
   }
 
   const onInputOTPChange = async (value: string) => {
     setCode(value)
     setInvalidCode(false)
-    setErrorMessage('')
     if (value.length !== 6 || pending || retryWait > 0) return
     if (!email) {
-      setErrorMessage('Email is missing. Please return to login or registration.')
+      showError('Email is missing or invalid. Please restart from login or request a new reset code.')
       return
     }
     if (type === 'register') {
       const input = VerifyEmailInputSchema.safeParse({ email, code: value })
       if (!input.success) {
-        setErrorMessage(input.error.issues[0].message)
+        showError(input.error.issues[0].message)
         return
       }
       setPending(true)
@@ -87,9 +89,16 @@ const EmailVerificationForm = ({ email, type, initialResendCooldown = 0 }: Email
         .catch(showError)
         .finally(() => setPending(false))
     } else {
+      const input = VerifyResetPasswordInputSchema.safeParse({ email, code: value })
+      if (!input.success) {
+        showError(input.error.issues[0].message)
+        return
+      }
       setPending(true)
-      await confirmResetPasswordOtp({ otp: value, email })
-        .then((res: any) => {
+      await ubtvAuthApi
+        .verifyResetPassword(input.data)
+        .then(({ data }) => {
+          if (!data.resetToken) throw new Error('Invalid response from authentication API')
           addToast({
             title: 'OTP',
             description: 'Confirm reset password OTP successfully!',
@@ -97,10 +106,10 @@ const EmailVerificationForm = ({ email, type, initialResendCooldown = 0 }: Email
             shouldShowTimeoutProgress: true,
             color: 'success',
           })
-          router.push(`/reset-password?token=${res.payload.data.token}`)
+          router.replace(`/reset-password?${new URLSearchParams({ email: input.data.email, token: data.resetToken })}`)
           router.refresh()
         })
-        .catch(() => setInvalidCode(true))
+        .catch(showError)
         .finally(() => setPending(false))
     }
   }
@@ -109,19 +118,23 @@ const EmailVerificationForm = ({ email, type, initialResendCooldown = 0 }: Email
     if (pending || resendCooldown > 0 || retryWait > 0) return
     const input = ResendVerificationInputSchema.safeParse({ email })
     if (!input.success) {
-      setErrorMessage(input.error.issues[0].message)
+      showError(input.error.issues[0].message)
       return
     }
     setPending(true)
     setIsResending(true)
     setInvalidCode(false)
-    setErrorMessage('')
     try {
-      await ubtvAuthApi.resendVerification(input.data)
+      if (type === 'register') {
+        await ubtvAuthApi.resendVerification(input.data)
+      } else {
+        await ubtvAuthApi.forgotPassword(input.data)
+        setCode('')
+      }
       setResendCooldown(60)
       addToast({
-        title: 'Verification request received',
-        description: 'If your account is eligible, a verification email may be sent. Please check your inbox and spam folder.',
+        title: type === 'register' ? 'Verification request received' : 'Password reset request received',
+        description: type === 'register' ? 'If your account is eligible, a verification email may be sent. Please check your inbox and spam folder.' : 'If your account is eligible, a reset code may be sent. Please check your inbox and spam folder.',
         color: 'default',
       })
     } catch (error) {
@@ -134,24 +147,23 @@ const EmailVerificationForm = ({ email, type, initialResendCooldown = 0 }: Email
 
   return (
     <div className='flex flex-col items-center w-full mt-6'>
+      {type === 'resetpassword' && <p className='mb-6 text-sm text-muted-foreground text-center'>The code expires after 10 minutes. You have up to 5 incorrect attempts.</p>}
       <InputOtp
         as='label'
         aria-label='Verification code'
         autoFocus
         length={6}
         inputMode='numeric'
+        autoComplete='one-time-code'
         variant='flat'
+        validationBehavior='aria'
+        errorMessage={() => null}
         isDisabled={pending || retryWait > 0}
         isInvalid={invalidCode}
-        errorMessage={errorMessage || 'Invalid OTP code'}
         value={code}
         onValueChange={onInputOTPChange}
+        size='lg'
       />
-      {errorMessage && !invalidCode && (
-        <p role='alert' className='mt-2 text-sm text-danger whitespace-pre-line'>
-          {errorMessage}
-        </p>
-      )}
       {retryWait > 0 && (
         <p role='status' className='mt-2 text-sm text-muted-foreground'>
           Try again in {retryWait}s.
@@ -159,11 +171,16 @@ const EmailVerificationForm = ({ email, type, initialResendCooldown = 0 }: Email
       )}
       <p className='text-muted-foreground mt-6'>
         Didn't receive the email?{' '}
-        <ShadcnButton className='p-0' variant='link' disabled={pending || resendCooldown > 0 || retryWait > 0} aria-busy={isResending} onClick={type === 'register' ? resend : undefined}>
+        <ShadcnButton className='p-0' variant='link' disabled={pending || resendCooldown > 0 || retryWait > 0 || !email} aria-busy={isResending} onClick={resend}>
           {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Click to resend'}
           {isResending && <Spinner className='ml-2' aria-hidden='true' />}
         </ShadcnButton>
       </p>
+      {type === 'resetpassword' && (
+        <ShadcnButton onClick={() => router.replace('/forgot-password')} variant='link' className='mt-2' disabled={pending}>
+          Use a different email or restart
+        </ShadcnButton>
+      )}
       <ShadcnButton onClick={() => router.push('/login')} variant='linkHover2' className='mt-2'>
         <ArrowLeft size={16} style={{ marginRight: 8 }} />
         Back to Login

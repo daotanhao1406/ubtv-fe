@@ -1,6 +1,6 @@
 import z from 'zod'
 
-import { RegisterInputSchema } from '@/schema/auth-api.schema'
+import { RegisterInputSchema, ResetPasswordInputSchema } from '@/schema/auth-api.schema'
 
 export const SignUpBody = z
   .object({
@@ -46,3 +46,13 @@ export const ResetPasswordBody = z
 export type SignUpBodyType = z.TypeOf<typeof SignUpBody>
 export type ForgotPasswordBodyType = z.TypeOf<typeof ForgotPasswordBody>
 export type ResetPasswordBodyType = z.TypeOf<typeof ResetPasswordBody>
+
+export const ResetPasswordFormSchema = ResetPasswordInputSchema.extend({
+  confirmPassword: ResetPasswordInputSchema.shape.password,
+}).superRefine(({ password, confirmPassword }, ctx) => {
+  if (password !== confirmPassword) {
+    ctx.addIssue({ code: 'custom', message: "Password confirmation doesn't match Password", path: ['confirmPassword'] })
+  }
+})
+
+export type ResetPasswordFormInput = z.infer<typeof ResetPasswordFormSchema>
