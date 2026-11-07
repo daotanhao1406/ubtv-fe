@@ -10,7 +10,7 @@ import GoogleIcon from 'public/svg/google.svg'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
-import { AuthHttpError } from '@/lib/auth-http'
+import { HttpError } from '@/lib/http'
 
 import { Button as ShadcnButton } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
@@ -54,12 +54,12 @@ const LoginForm = ({ email, redirectTo }: LoginFormProps) => {
       })
       router.replace(redirectTo)
     } catch (error) {
-      if (error instanceof AuthHttpError && error.status === 403 && error.payload.code === 'EMAIL_NOT_VERIFIED') {
+      if (error instanceof HttpError && error.status === 403 && error.payload.code === 'EMAIL_NOT_VERIFIED') {
         router.push(`/email-verification?type=register&email=${encodeURIComponent(values.email)}`)
       } else {
         addToast({
           title: 'Login failed',
-          description: error instanceof AuthHttpError && error.status === 401 ? 'Invalid email or password.' : error instanceof Error ? error.message : 'Unable to log in. Please try again.',
+          description: error instanceof HttpError && error.status === 401 ? 'Invalid email or password.' : error instanceof Error ? error.message : 'Unable to log in. Please try again.',
           color: 'danger',
           timeout: 5000,
           shouldShowTimeoutProgress: true,

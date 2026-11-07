@@ -1,15 +1,15 @@
 'use client'
 
-import { Button } from '@heroui/react'
+import { Button, ButtonProps } from '@heroui/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-export function LoginButton() {
+export function LoginButton(props: ButtonProps) {
   const pathname = usePathname()
 
   return pathname !== '/login' ? (
     <Link href='/login'>
-      <Button className='font-semibold' color='primary'>
+      <Button className='font-semibold' color='primary' {...props}>
         Login
       </Button>
     </Link>

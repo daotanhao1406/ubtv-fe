@@ -1,8 +1,8 @@
 /** @jest-environment node */
 
-import { AuthHttpError } from '@/lib/auth-http'
+import { HttpError } from '@/lib/http'
 
-import ubtvAuthApi from '@/api/ubtv-auth'
+import authApi from '@/api/auth'
 
 jest.mock('@/lib/env', () => ({
   __esModule: true,
@@ -23,7 +23,7 @@ const contracts = [
     body: { email: user.email },
     status: 200,
     data: { message: 'If eligible, a reset code will be sent' },
-    call: () => ubtvAuthApi.forgotPassword(registrationForm),
+    call: () => authApi.forgotPassword(registrationForm),
   },
   {
     name: 'verifyResetPassword',
@@ -32,7 +32,7 @@ const contracts = [
     body: { email: user.email, code: '012345' },
     status: 200,
     data: { resetToken: resetForm.resetToken },
-    call: () => ubtvAuthApi.verifyResetPassword(verificationForm),
+    call: () => authApi.verifyResetPassword(verificationForm),
   },
   {
     name: 'resetPassword',
@@ -41,7 +41,7 @@ const contracts = [
     body: { email: user.email, resetToken: resetForm.resetToken, password: resetForm.password },
     status: 200,
     data: { message: 'Password reset successfully' },
-    call: () => ubtvAuthApi.resetPassword(resetForm),
+    call: () => authApi.resetPassword(resetForm),
   },
   {
     name: 'register',
@@ -50,7 +50,7 @@ const contracts = [
     body: { name: registrationForm.name, email: user.email, password: registrationForm.password },
     status: 201,
     data: { ...user, emailVerified: false, verificationEmailSent: false },
-    call: () => ubtvAuthApi.register(registrationForm),
+    call: () => authApi.register(registrationForm),
   },
   {
     name: 'verifyEmail',
@@ -59,7 +59,7 @@ const contracts = [
     body: { email: user.email, code: '012345' },
     status: 200,
     data: { emailVerified: true, message: 'Email verified' },
-    call: () => ubtvAuthApi.verifyEmail(verificationForm),
+    call: () => authApi.verifyEmail(verificationForm),
   },
   {
     name: 'resendVerification',
@@ -68,7 +68,7 @@ const contracts = [
     body: { email: user.email },
     status: 200,
     data: { message: 'If eligible, a verification email will be sent' },
-    call: () => ubtvAuthApi.resendVerification(registrationForm),
+    call: () => authApi.resendVerification(registrationForm),
   },
   {
     name: 'login',
@@ -77,7 +77,7 @@ const contracts = [
     body: { email: user.email, password: registrationForm.password },
     status: 200,
     data: session,
-    call: () => ubtvAuthApi.login(registrationForm),
+    call: () => authApi.login(registrationForm),
   },
   {
     name: 'refresh',
@@ -86,7 +86,7 @@ const contracts = [
     body: undefined,
     status: 200,
     data: session,
-    call: () => ubtvAuthApi.refresh(),
+    call: () => authApi.refresh(),
   },
   {
     name: 'me',
@@ -95,7 +95,7 @@ const contracts = [
     body: undefined,
     status: 200,
     data: user,
-    call: () => ubtvAuthApi.me(session.accessToken),
+    call: () => authApi.me(session.accessToken),
   },
   {
     name: 'logout',
@@ -104,11 +104,11 @@ const contracts = [
     body: undefined,
     status: 200,
     data: { message: 'Logged out' },
-    call: () => ubtvAuthApi.logout(),
+    call: () => authApi.logout(),
   },
 ]
 
-describe('ubtvAuthApi backend contract', () => {
+describe('authApi backend contract', () => {
   let fetchMock: jest.SpyInstance<ReturnType<typeof fetch>, Parameters<typeof fetch>>
 
   beforeEach(() => {
@@ -141,9 +141,9 @@ describe('ubtvAuthApi backend contract', () => {
     const payload = { statusCode: 403, message: 'Email verification is required', code: 'EMAIL_NOT_VERIFIED', error: 'Forbidden' }
     fetchMock.mockResolvedValue(Response.json(payload, { status: 403 }))
 
-    const error = await ubtvAuthApi.login(registrationForm).catch((error: unknown) => error)
+    const error = await authApi.login(registrationForm).catch((error: unknown) => error)
 
-    expect(error).toBeInstanceOf(AuthHttpError)
+    expect(error).toBeInstanceOf(HttpError)
     expect(error).toMatchObject({ status: 403, payload })
     expect(fetchMock).toHaveBeenCalledTimes(1)
   })
@@ -152,9 +152,9 @@ describe('ubtvAuthApi backend contract', () => {
     const payload = { statusCode: status, message: 'Reset code is expired, invalid, or locked' }
     fetchMock.mockResolvedValue(Response.json(payload, { status, headers: { 'Retry-After': '90' } }))
 
-    const error = await ubtvAuthApi.verifyResetPassword({ email: user.email, code: '012345' }).catch((error: unknown) => error)
+    const error = await authApi.verifyResetPassword({ email: user.email, code: '012345' }).catch((error: unknown) => error)
 
-    expect(error).toBeInstanceOf(AuthHttpError)
+    expect(error).toBeInstanceOf(HttpError)
     expect(error).toMatchObject({ status, payload, retryAfter: '90' })
     expect(fetchMock).toHaveBeenCalledTimes(1)
   })
@@ -163,7 +163,7 @@ describe('ubtvAuthApi backend contract', () => {
     const payload = { statusCode: 400, message: 'Reset token is expired or already used' }
     fetchMock.mockResolvedValue(Response.json(payload, { status: 400 }))
 
-    await expect(ubtvAuthApi.resetPassword(resetForm)).rejects.toMatchObject({ status: 400, payload })
+    await expect(authApi.resetPassword(resetForm)).rejects.toMatchObject({ status: 400, payload })
     expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 })

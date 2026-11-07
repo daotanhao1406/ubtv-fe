@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
-import { AuthHttpError } from '@/lib/auth-http'
+import { HttpError } from '@/lib/http'
 
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 
@@ -63,8 +63,8 @@ const SignUpForm = () => {
       })
       router.push(`/email-verification?${new URLSearchParams({ type: 'register', email: data.email, registered: 'true' })}`)
     } catch (error) {
-      const emailExists = error instanceof AuthHttpError && error.status === 409
-      if (error instanceof AuthHttpError && error.status === 429) setRetryWait(retryDelay(error.retryAfter))
+      const emailExists = error instanceof HttpError && error.status === 409
+      if (error instanceof HttpError && error.status === 429) setRetryWait(retryDelay(error.retryAfter))
       addToast({
         title: emailExists ? 'Email already registered' : 'Registration failed',
         description: emailExists ? 'Log in or verify your email to continue.' : error instanceof Error ? error.message : 'Unable to register. Please try again.',
