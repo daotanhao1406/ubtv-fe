@@ -1,5 +1,9 @@
 # UBTV
 
+## CI configuration
+
+GitHub Actions does not receive the ignored local `.env` file. Both CI jobs need `NEXT_PUBLIC_MOVIE_API` and a valid URL for `NEXT_PUBLIC_API_ENDPOINT` when building Next.js. `.github/workflows/CI.yml` supplies public fixture URLs for build and unit-test checks without requiring repository secrets or a running backend. Deployment builds must use the real service URLs.
+
 ## Auth configuration
 
 - Copy `.env.example` to `.env` for development. The local frontend uses `http://localhost:3000`; the local auth backend uses `http://localhost:3355`.
