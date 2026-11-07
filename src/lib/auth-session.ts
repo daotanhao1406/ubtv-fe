@@ -101,7 +101,7 @@ export const createAuthSession = (api: SessionApi = ubtvAuthApi) => {
     throw new Error('Unable to load profile')
   }
 
-  return { login, refresh, logout, fetchMe }
+  return { login, refresh, logout, fetchMe, clearSession }
 }
 
 let browserSession: ReturnType<typeof createAuthSession> | undefined
