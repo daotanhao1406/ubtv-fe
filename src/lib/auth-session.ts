@@ -1,13 +1,13 @@
-import { AuthHttpError } from '@/lib/auth-http'
+import { HttpError } from '@/lib/http'
 
-import ubtvAuthApi from '@/api/ubtv-auth'
+import authApi from '@/api/auth'
 import type { LoginInput } from '@/schema/auth-api.schema'
 
 import type { AuthUser } from '@/types/auth'
 
-type SessionApi = Pick<typeof ubtvAuthApi, 'login' | 'refresh' | 'logout' | 'me'>
+type SessionApi = Pick<typeof authApi, 'login' | 'refresh' | 'logout' | 'me'>
 
-export const createAuthSession = (api: SessionApi = ubtvAuthApi) => {
+export const createAuthSession = (api: SessionApi = authApi) => {
   let accessToken: string | null = null
   let refreshRequest: Promise<AuthUser> | null = null
   let requestQueue = Promise.resolve()
@@ -90,7 +90,7 @@ export const createAuthSession = (api: SessionApi = ubtvAuthApi) => {
         return data
       } catch (error) {
         checkVersion(version)
-        if (!(error instanceof AuthHttpError) || error.status !== 401 || attempt === 1) {
+        if (!(error instanceof HttpError) || error.status !== 401 || attempt === 1) {
           clearSession()
           throw error
         }

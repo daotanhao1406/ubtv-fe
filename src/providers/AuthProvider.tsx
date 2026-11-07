@@ -6,10 +6,7 @@ import { createContext, useCallback, useContext, useEffect, useState } from 'rea
 
 import { getAuthSession } from '@/lib/auth-session'
 
-import { CustomResponseType } from '@/api'
-import authApiRequest from '@/api/auth'
-import ubtvAuthApi from '@/api/ubtv-auth'
-import { ForgotPasswordBodyType, ResetPasswordBodyType } from '@/schema/auth.schema'
+import authApi from '@/api/auth'
 import type { LoginInput, ResetPasswordInput } from '@/schema/auth-api.schema'
 
 import type { AuthUser } from '@/types/auth'
@@ -21,10 +18,7 @@ type AuthContextType = {
   restoreSession: () => Promise<void>
   login: (body: LoginInput) => Promise<void>
   logout: () => Promise<void>
-  register: typeof ubtvAuthApi.register
-  forgotPassword: (body: ForgotPasswordBodyType) => Promise<void>
-  resetPassword: (body: ResetPasswordBodyType) => Promise<void>
-  confirmResetPasswordOtp: (body: { otp: string; email: string }) => Promise<CustomResponseType>
+  register: typeof authApi.register
   completePasswordReset: (body: ResetPasswordInput) => Promise<void>
 }
 
@@ -51,13 +45,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [])
 
   useEffect(() => {
-    // Remove tokens saved by the previous frontend auth flow.
-    try {
-      localStorage.removeItem('accessToken')
-      localStorage.removeItem('accessTokenExpiresAt')
-    } catch {
-      // Authentication also works when browser storage is unavailable.
-    }
     void restoreSession()
   }, [restoreSession])
 
@@ -82,23 +69,14 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   const completePasswordReset = async (body: ResetPasswordInput) => {
-    await ubtvAuthApi.resetPassword(body)
+    await authApi.resetPassword(body)
     getAuthSession().clearSession()
     setUser(null)
     setLogoutError(false)
   }
 
-  // Keep legacy password recovery methods for callers pending deprecation.
-  const confirmResetPasswordOtp = (body: { otp: string; email: string }) => authApiRequest.confirmResetPasswordOtp(body)
-  const forgotPassword = async (body: ForgotPasswordBodyType) => {
-    await authApiRequest.forgotPassword(body)
-  }
-  const resetPassword = async (body: ResetPasswordBodyType) => {
-    await authApiRequest.resetPassword(body)
-  }
-
   return (
-    <AuthContext.Provider value={{ user, isInitializing, isLoggingOut, restoreSession, login, logout, register: ubtvAuthApi.register, confirmResetPasswordOtp, forgotPassword, resetPassword, completePasswordReset }}>
+    <AuthContext.Provider value={{ user, isInitializing, isLoggingOut, restoreSession, login, logout, register: authApi.register, completePasswordReset }}>
       {logoutError && (
         <div role='alert' className='flex flex-wrap items-center justify-center gap-3 bg-warning-100 p-3 text-warning-900'>
           <p>You are signed out locally. We could not confirm sign-out with the server.</p>

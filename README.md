@@ -22,5 +22,8 @@ CORS and cookie policy are separate. If the backend uses `SameSite=Lax`, the fro
 - Logout clears local authentication immediately. If the server request fails, a visible retry action remains available.
 - The profile page shows the current user's name, email, and verification status. There are no role/admin or profile-editing APIs in this integration.
 - Route guards control the interface; the backend must authorize every protected API request. Do not put private server data behind a client guard alone.
-- Forgot/reset password still use their existing endpoints and response format through `src/api/auth.ts` and `src/lib/http.ts`. They are pending backend implementation. The legacy HTTP client no longer manages authentication tokens.
+- Password recovery uses `src/api/auth.ts` and `src/lib/http.ts`: `POST /auth/forgot-password` sends `{ email }`, `POST /auth/verify-reset-password` sends `{ email, code }` and receives `data.resetToken`, then `POST /auth/reset-password` sends `{ email, resetToken, password }`.
+- Reset codes expire after 10 minutes, allow at most 5 incorrect attempts, and can be resent after 60 seconds. Reset tokens are single-use and expire after 10 minutes. The backend enforces these limits; the frontend displays errors through toast notifications and observes resend/retry cooldowns.
+- A successful password reset invalidates previous sessions on the backend, clears the local session, and requires a new login.
+- Auth responses use `{ statusCode, message, data, timestamp }`; API errors use `HttpError` with the HTTP status, normalized error payload, and optional `Retry-After` header.
 - Refresh requests are shared within one tab. Cross-tab session coordination is intentionally omitted.

@@ -1,5 +1,5 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-import nextJest from 'next/jest.js'
+// eslint-disable-next-line @typescript-eslint/no-require-imports -- Jest loads this CommonJS config without ts-node.
+const nextJest = require('next/jest.js')
 
 const createJestConfig = nextJest({
   // Provide the path to your Next.js app to load next.config.js and .env files in your test environment

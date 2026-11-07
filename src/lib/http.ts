@@ -1,139 +1,91 @@
 import envVariables from '@/lib/env'
 
-import { CustomResponseType, DefaultResType } from '@/api'
+import type { ApiErrorResponse, ApiResponse } from '@/types/api'
 
-// Define error response interface (for non-success cases)
-interface ErrorResponse {
-  status: string
-  message: string
-  errorCode: string
-}
-
-// Union type for all possible responses
-type LegacyResponse = DefaultResType | ErrorResponse | EntityErrorPayload
-
-// Type guard to check if response is entity error (422)
-const isEntityErrorResponse = (response: LegacyResponse): response is EntityErrorPayload => {
-  return 'errors' in response && Array.isArray((response as any).errors)
-}
-
-type CustomOptions = Omit<RequestInit, 'method' | 'signal'> & {
-  baseUrl?: string | undefined
-}
-
-const ENTITY_ERROR_STATUS = 422
-
-type EntityErrorPayload = {
-  message: string
-  errors: {
-    field: string
-    message: string
-  }[]
-}
+type HttpRequestOptions = Pick<RequestInit, 'headers'>
 
 export class HttpError extends Error {
-  status: number
-  payload: {
-    message: string
-    [key: string]: any
-  }
-  constructor({ status, payload }: { status: number; payload: any }) {
-    super('Http Error')
+  readonly status: number
+  readonly payload: ApiErrorResponse
+  readonly retryAfter: string | null
+
+  constructor(status: number, payload: ApiErrorResponse, retryAfter: string | null = null) {
+    super(Array.isArray(payload.message) ? payload.message.join('\n') : payload.message)
+    this.name = 'HttpError'
     this.status = status
     this.payload = payload
+    this.retryAfter = retryAfter
   }
 }
 
-export class EntityError extends HttpError {
-  status: 422
-  payload: EntityErrorPayload
-  constructor({ status, payload }: { status: 422; payload: EntityErrorPayload }) {
-    super({ status, payload })
-    this.status = status
-    this.payload = payload
-  }
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
-// Kept for the legacy password recovery API; authentication belongs to auth-session.ts.
-const request = async (method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: string, options?: CustomOptions | undefined): Promise<CustomResponseType> => {
-  let body: FormData | string | undefined = undefined
-  if (options?.body instanceof FormData) {
-    body = options.body
-  } else if (options?.body) {
-    body = JSON.stringify(options.body)
+const normalizeError = (status: number, payload: unknown): ApiErrorResponse => {
+  const error: ApiErrorResponse = {
+    statusCode: status,
+    message: `API request failed (${status})`,
   }
-  const baseHeaders: {
-    [key: string]: string
-  } =
-    body instanceof FormData
-      ? {}
-      : {
-          'Content-Type': 'application/json',
-        }
-  // Nếu không truyền baseUrl (hoặc baseUrl = undefined) thì lấy từ envConfig.NEXT_PUBLIC_API_ENDPOINT
-  // Nếu truyền baseUrl thì lấy giá trị truyền vào, truyền vào '' thì đồng nghĩa với việc chúng ta gọi API đến Next.js Server
 
-  const baseUrl = options?.baseUrl === undefined ? envVariables.NEXT_PUBLIC_API_ENDPOINT : options.baseUrl
-  const fullUrl = url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`
+  if (isRecord(payload)) {
+    if (typeof payload.message === 'string' && payload.message.length > 0) {
+      error.message = payload.message
+    } else if (Array.isArray(payload.message) && payload.message.length > 0 && payload.message.every((message) => typeof message === 'string')) {
+      error.message = payload.message
+    }
 
-  const res = await fetch(fullUrl, {
-    ...options,
-    headers: {
-      ...baseHeaders,
-      ...options?.headers,
-    } as any,
-    body,
+    if (typeof payload.error === 'string') error.error = payload.error
+    if (typeof payload.code === 'string') error.code = payload.code
+  }
+
+  return error
+}
+
+const request = async <T>(method: 'GET' | 'POST', path: string, body: unknown, options?: HttpRequestOptions): Promise<ApiResponse<T>> => {
+  const headers = new Headers(options?.headers)
+  headers.set('Accept', 'application/json')
+
+  if (method === 'POST') {
+    headers.set('X-App-Request', '1')
+    if (body !== undefined) headers.set('Content-Type', 'application/json')
+  }
+
+  const baseUrl = envVariables.NEXT_PUBLIC_API_ENDPOINT.replace(/\/+$/, '')
+  const response = await fetch(`${baseUrl}/${path.replace(/^\/+/, '')}`, {
     method,
+    headers,
     credentials: 'include',
+    cache: 'no-store',
+    body: body === undefined ? undefined : JSON.stringify(body),
   })
 
-  const payload: LegacyResponse = await res.json()
-
-  const data: CustomResponseType = {
-    status: res.status,
-    payload: payload as DefaultResType,
+  const text = await response.text()
+  let payload: unknown
+  try {
+    payload = JSON.parse(text)
+  } catch {
+    // Proxy error pages and empty responses are not part of the JSON contract.
   }
 
-  // Interceptor là nời chúng ta xử lý request và response trước khi trả về cho phía component
-  if (!res.ok) {
-    if (res.status === ENTITY_ERROR_STATUS) {
-      // For 422 errors, we expect EntityErrorPayload format
-      if (isEntityErrorResponse(payload)) {
-        throw new EntityError({
-          status: 422,
-          payload: payload,
-        })
-      } else {
-        // Fallback for unexpected 422 format
-        throw new EntityError({
-          status: 422,
-          payload: {
-            message: 'Validation error',
-            errors: [],
-          },
-        })
-      }
-    } else {
-      throw new HttpError(data)
-    }
+  if (!response.ok) {
+    throw new HttpError(response.status, normalizeError(response.status, payload), response.headers.get('Retry-After'))
   }
 
-  // At this point, we know the request was successful, so we can safely return
-  return data
+  if (!isRecord(payload) || typeof payload.statusCode !== 'number' || typeof payload.message !== 'string' || !('data' in payload) || typeof payload.timestamp !== 'string') {
+    throw new Error('Invalid response from API')
+  }
+
+  // Validate the envelope here; endpoint-specific payloads are typed by the caller.
+  return payload as unknown as ApiResponse<T>
 }
 
 const http = {
-  get: (url: string, options?: Omit<CustomOptions, 'body'> | undefined) => {
-    return request('GET', url, options)
+  get: <T = Record<string, unknown>>(path: string, options?: HttpRequestOptions) => {
+    return request<T>('GET', path, undefined, options)
   },
-  post: (url: string, body: any, options?: Omit<CustomOptions, 'body'> | undefined) => {
-    return request('POST', url, { ...options, body })
-  },
-  put: (url: string, body: any, options?: Omit<CustomOptions, 'body'> | undefined) => {
-    return request('PUT', url, { ...options, body })
-  },
-  delete: (url: string, options?: Omit<CustomOptions, 'body'> | undefined) => {
-    return request('DELETE', url, { ...options })
+  post: <T = Record<string, unknown>>(path: string, body?: unknown, options?: HttpRequestOptions) => {
+    return request<T>('POST', path, body, options)
   },
 }
 

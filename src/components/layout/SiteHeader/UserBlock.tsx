@@ -9,8 +9,7 @@ import { useAuth } from '@/providers/AuthProvider'
 export const UserBlock = () => {
   const { user, logout, isInitializing } = useAuth()
   const router = useRouter()
-  if (isInitializing) return null
-  if (!user) return <LoginButton />
+  if (isInitializing || !user) return <LoginButton isLoading={isInitializing} />
   return (
     <Dropdown placement='bottom-end'>
       <DropdownTrigger>
