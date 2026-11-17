@@ -1,5 +1,4 @@
-import { getAuthSession } from '@/lib/auth-session'
-import http, { HttpError } from '@/lib/http'
+import http from '@/lib/http'
 
 export interface UserLibraryPage {
   movieIds: string[]
@@ -9,18 +8,12 @@ export interface UserLibraryPage {
   totalPages: number
 }
 
-const getPage = async (list: 'favorites' | 'watched', page: number, pageSize: number) => {
-  const path = `/users/me/library/${list}?page=${page}&pageSize=${pageSize}`
-  const session = getAuthSession()
-
-  try {
-    return await http.get<UserLibraryPage>(path)
-  } catch (error) {
-    if (!(error instanceof HttpError) || error.status !== 401) throw error
-    await session.refresh()
-    return http.get<UserLibraryPage>(path)
-  }
+export interface FavoriteMutationData {
+  movieId: string
+  isFavorite: boolean
 }
+
+const getPage = (list: 'favorites' | 'watched', page: number, pageSize: number) => http.auth.get<UserLibraryPage>(`/users/me/library/${list}?page=${page}&pageSize=${pageSize}`)
 
 const getAllMovieIds = async (list: 'favorites' | 'watched') => {
   const pageSize = 100
@@ -33,6 +26,8 @@ const getAllMovieIds = async (list: 'favorites' | 'watched') => {
 const userLibraryApi = {
   getFavorites: () => getAllMovieIds('favorites'),
   getWatched: () => getAllMovieIds('watched'),
+  addFavorite: (movieId: string) => http.auth.post<FavoriteMutationData>('/users/me/library/favorites', { movieId }),
+  removeFavorite: (movieId: string) => http.auth.delete<FavoriteMutationData>(`/users/me/library/favorites?movieId=${encodeURIComponent(movieId)}`),
 }
 
 export default userLibraryApi

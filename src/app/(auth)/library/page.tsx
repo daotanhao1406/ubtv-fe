@@ -68,9 +68,9 @@ const LibraryPage = () => {
       <section aria-label='Movie library' className='flex flex-1 flex-col px-4 pb-10 pt-4 md:pl-6 md:pt-5'>
         <Tabs
           aria-label='Movie library lists'
-          className='flex w-full flex-1 flex-col'
+          className='w-full'
           classNames={{
-            base: 'flex w-full flex-1 flex-col',
+            base: 'w-full',
             tabList: 'w-full max-w-[560px] justify-start gap-6 rounded-none border-b border-white/10 bg-transparent p-0',
             tab: 'h-12 px-3',
             cursor: 'w-full bg-white',
