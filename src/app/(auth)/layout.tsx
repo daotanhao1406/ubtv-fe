@@ -23,7 +23,7 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <SiteHeader />
-      <main className='flex-1'>{isInitializing ? <Spinner label='Loading...' className='w-full p-10' /> : user ? <section>{children}</section> : null}</main>
+      <main className='flex flex-1 flex-col'>{isInitializing ? <Spinner label='Loading...' className='w-full p-10' /> : user ? <section className='flex flex-1 flex-col'>{children}</section> : null}</main>
       <SiteFooter />
     </>
   )

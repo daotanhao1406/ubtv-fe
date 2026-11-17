@@ -4,6 +4,12 @@ import type { ApiErrorResponse, ApiResponse } from '@/types/api'
 
 type HttpRequestOptions = Pick<RequestInit, 'headers'>
 
+let accessToken: string | null = null
+
+export const setAccessToken = (token: string | null) => {
+  accessToken = token
+}
+
 export class HttpError extends Error {
   readonly status: number
   readonly payload: ApiErrorResponse
@@ -45,6 +51,7 @@ const normalizeError = (status: number, payload: unknown): ApiErrorResponse => {
 const request = async <T>(method: 'GET' | 'POST', path: string, body: unknown, options?: HttpRequestOptions): Promise<ApiResponse<T>> => {
   const headers = new Headers(options?.headers)
   headers.set('Accept', 'application/json')
+  if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`)
 
   if (method === 'POST') {
     headers.set('X-App-Request', '1')

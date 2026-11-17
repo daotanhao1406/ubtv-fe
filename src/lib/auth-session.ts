@@ -1,4 +1,4 @@
-import { HttpError } from '@/lib/http'
+import { HttpError, setAccessToken } from '@/lib/http'
 
 import authApi from '@/api/auth'
 import type { LoginInput } from '@/schema/auth-api.schema'
@@ -29,6 +29,7 @@ export const createAuthSession = (api: SessionApi = authApi) => {
 
   const clearSession = () => {
     accessToken = null
+    setAccessToken(null)
     refreshAllowed = false
     sessionVersion++
   }
@@ -41,6 +42,7 @@ export const createAuthSession = (api: SessionApi = authApi) => {
       const { data } = await api.login(input)
       checkVersion(version)
       accessToken = data.accessToken
+      setAccessToken(accessToken)
       refreshAllowed = true
       return data.user
     })
@@ -55,6 +57,7 @@ export const createAuthSession = (api: SessionApi = authApi) => {
         const { data } = await api.refresh()
         checkVersion(version)
         accessToken = data.accessToken
+        setAccessToken(accessToken)
         return data.user
       })
         .catch((error: unknown) => {
@@ -85,7 +88,7 @@ export const createAuthSession = (api: SessionApi = authApi) => {
       const token = accessToken
       if (!token) return refresh()
       try {
-        const { data } = await api.me(token)
+        const { data } = await api.me()
         checkVersion(version)
         return data
       } catch (error) {

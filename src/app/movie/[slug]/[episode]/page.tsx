@@ -6,7 +6,7 @@ import VideoPlayer from '@/components/video-player'
 
 import EpisodesList from '@/elements/movie/episodes-list'
 import MovieEpisodeInformation from '@/elements/movie/movie-episode-information'
-import { getMovie } from '@/services/movie.service'
+import { getMovieBySlug } from '@/services/movie.service'
 
 import { MovieResponse } from '@/types/movie'
 
@@ -28,7 +28,7 @@ export default function MovieEpisodePage() {
 
   useEffect(() => {
     const getMovieData = async () => {
-      const movie = await getMovie(params.slug)
+      const movie = await getMovieBySlug(params.slug)
       setMovie(movie)
     }
 
