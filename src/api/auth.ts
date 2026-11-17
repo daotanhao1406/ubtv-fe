@@ -21,10 +21,7 @@ const authApi = {
 
   refresh: () => http.post<AccessTokenData>('/auth/refresh'),
 
-  me: (accessToken: string) =>
-    http.get<AuthUser>('/auth/me', {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    }),
+  me: (_accessToken?: string) => http.get<AuthUser>('/auth/me'),
 
   logout: () => http.post<AuthMessageData>('/auth/logout'),
 }
