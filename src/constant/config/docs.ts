@@ -16,6 +16,10 @@ export const docsConfig: DocsConfig = {
       title: 'Profile',
       href: '/profile',
     },
+    {
+      title: 'My Library',
+      href: '/library',
+    },
   ],
   sidebarNav: [
     {

@@ -16,9 +16,10 @@ interface MovieSectionProps {
   loading?: boolean
   className?: string
   isCarousel?: boolean
+  linkMovies?: boolean
 }
 
-export function MovieSection({ title, movies, loading = true, className, isCarousel }: MovieSectionProps) {
+export function MovieSection({ title, movies, loading = true, className, isCarousel, linkMovies = true }: MovieSectionProps) {
   const renderListMovies = useCallback(() => {
     if (loading) {
       return (
@@ -48,9 +49,13 @@ export function MovieSection({ title, movies, loading = true, className, isCarou
           <CarouselContent className='-ml-2 md:-ml-4'>
             {movies.map((movie) => (
               <CarouselItem key={movie._id} className='pl-2 md:pl-4 basis-1/2 md:basis-1/4 lg:basis-1/6 xl:basis-[12.5%] 2xl:basis-[11.1%] min-[2560px]:basis-1/12'>
-                <Link href={`/movie/${movie.slug}`}>
-                  <MovieCard item={movie} />
-                </Link>
+                {linkMovies ? (
+                  <Link href={`/movie/${movie.slug}`}>
+                    <MovieCard item={movie} />
+                  </Link>
+                ) : (
+                  <MovieCard item={movie} isInteractive={false} />
+                )}
               </CarouselItem>
             ))}
           </CarouselContent>
@@ -61,14 +66,22 @@ export function MovieSection({ title, movies, loading = true, className, isCarou
     }
     return (
       <div className='flex flex-wrap'>
-        {movies.map((movie) => (
-          <Link key={movie._id} href={`/movie/${movie.slug}`} className='p-2 basis-1/2 md:basis-1/4 lg:basis-1/6 xl:basis-[12.5%] 2xl:basis-[11.1%] min-[2560px]:basis-1/12'>
-            <MovieCard item={movie} />
-          </Link>
-        ))}
+        {movies.map((movie) => {
+          const className = 'p-2 basis-1/2 md:basis-1/4 lg:basis-1/6 xl:basis-[12.5%] 2xl:basis-[11.1%] min-[2560px]:basis-1/12'
+
+          return linkMovies ? (
+            <Link key={movie._id} href={`/movie/${movie.slug}`} className={className}>
+              <MovieCard item={movie} />
+            </Link>
+          ) : (
+            <div key={movie._id} className={className}>
+              <MovieCard item={movie} isInteractive={false} />
+            </div>
+          )
+        })}
       </div>
     )
-  }, [loading, isCarousel, movies])
+  }, [loading, isCarousel, linkMovies, movies])
 
   return (
     <div className={cn('py-8 px-4 md:px-6', className)}>

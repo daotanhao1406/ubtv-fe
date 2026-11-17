@@ -37,6 +37,9 @@ If there is no `.codegraph/` directory, skip CodeGraph entirely — indexing is 
 
 ## Frontend: reusable components receive props
 
+- Before creating a new UI component, inspect existing shared and feature components and reuse the closest fit. Extend an existing component with a small, typed option when it supports the new use case cleanly; avoid duplicating established UI such as movie lists rendered by `MovieSection`.
+- Create a new component only when no existing component fits or extending one would add inappropriate coupling or complexity.
+- Keep exactly one React component in each component file, and make that component the file's default export. Put every additional or helper component in its own file; non-component helpers, types, and constants may remain alongside the component when appropriate.
 - Read and normalize URL query parameters and route parameters in the page or parent container, then pass the required values to reusable components through explicit, typed props.
 - Do not duplicate the parent's URL parsing inside child components. Keep reusable forms and components independent of a particular page's URL structure.
 
