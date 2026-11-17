@@ -21,7 +21,7 @@ const authApi = {
 
   refresh: () => http.post<AccessTokenData>('/auth/refresh'),
 
-  me: (_accessToken?: string) => http.get<AuthUser>('/auth/me'),
+  me: (_accessToken?: string) => http.auth.get<AuthUser>('/auth/me'),
 
   logout: () => http.post<AuthMessageData>('/auth/logout'),
 }

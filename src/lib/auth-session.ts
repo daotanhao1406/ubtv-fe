@@ -1,4 +1,4 @@
-import { HttpError, setAccessToken } from '@/lib/http'
+import { setAccessToken, setUnauthorizedHandler } from '@/lib/http'
 
 import authApi from '@/api/auth'
 import type { LoginInput } from '@/schema/auth-api.schema'
@@ -84,24 +84,17 @@ export const createAuthSession = (api: SessionApi = authApi) => {
 
   const fetchMe = async (): Promise<AuthUser> => {
     const version = sessionVersion
-    for (let attempt = 0; attempt < 2; attempt++) {
-      const token = accessToken
-      if (!token) return refresh()
-      try {
-        const { data } = await api.me()
-        checkVersion(version)
-        return data
-      } catch (error) {
-        checkVersion(version)
-        if (!(error instanceof HttpError) || error.status !== 401 || attempt === 1) {
-          clearSession()
-          throw error
-        }
-        if (token === accessToken) await refresh()
-        checkVersion(version)
-      }
+    if (!accessToken) return refresh()
+
+    try {
+      const { data } = await api.me()
+      checkVersion(version)
+      return data
+    } catch (error) {
+      checkVersion(version)
+      clearSession()
+      throw error
     }
-    throw new Error('Unable to load profile')
   }
 
   return { login, refresh, logout, fetchMe, clearSession }
@@ -111,6 +104,9 @@ let browserSession: ReturnType<typeof createAuthSession> | undefined
 
 export const getAuthSession = () => {
   if (typeof window === 'undefined') throw new Error('Authentication sessions must be initialized in the browser')
-  browserSession ??= createAuthSession()
+  if (!browserSession) {
+    browserSession = createAuthSession()
+    setUnauthorizedHandler(() => browserSession!.refresh())
+  }
   return browserSession
 }

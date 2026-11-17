@@ -3,11 +3,17 @@ import envVariables from '@/lib/env'
 import type { ApiErrorResponse, ApiResponse } from '@/types/api'
 
 type HttpRequestOptions = Pick<RequestInit, 'headers'>
+type UnauthorizedHandler = () => Promise<unknown>
 
 let accessToken: string | null = null
+let unauthorizedHandler: UnauthorizedHandler | null = null
 
 export const setAccessToken = (token: string | null) => {
   accessToken = token
+}
+
+export const setUnauthorizedHandler = (handler: UnauthorizedHandler | null) => {
+  unauthorizedHandler = handler
 }
 
 export class HttpError extends Error {
@@ -48,7 +54,7 @@ const normalizeError = (status: number, payload: unknown): ApiErrorResponse => {
   return error
 }
 
-const request = async <T>(method: 'GET' | 'POST', path: string, body: unknown, options?: HttpRequestOptions): Promise<ApiResponse<T>> => {
+const request = async <T>(method: 'GET' | 'POST' | 'DELETE', path: string, body: unknown, options?: HttpRequestOptions, retryUnauthorized = false): Promise<ApiResponse<T>> => {
   const headers = new Headers(options?.headers)
   headers.set('Accept', 'application/json')
   if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`)
@@ -66,6 +72,11 @@ const request = async <T>(method: 'GET' | 'POST', path: string, body: unknown, o
     cache: 'no-store',
     body: body === undefined ? undefined : JSON.stringify(body),
   })
+
+  if (!response.ok && response.status === 401 && retryUnauthorized && unauthorizedHandler) {
+    await unauthorizedHandler()
+    return request<T>(method, path, body, options)
+  }
 
   const text = await response.text()
   let payload: unknown
@@ -93,6 +104,20 @@ const http = {
   },
   post: <T = Record<string, unknown>>(path: string, body?: unknown, options?: HttpRequestOptions) => {
     return request<T>('POST', path, body, options)
+  },
+  delete: <T = Record<string, unknown>>(path: string, options?: HttpRequestOptions) => {
+    return request<T>('DELETE', path, undefined, options)
+  },
+  auth: {
+    get: <T = Record<string, unknown>>(path: string, options?: HttpRequestOptions) => {
+      return request<T>('GET', path, undefined, options, true)
+    },
+    post: <T = Record<string, unknown>>(path: string, body?: unknown, options?: HttpRequestOptions) => {
+      return request<T>('POST', path, body, options, true)
+    },
+    delete: <T = Record<string, unknown>>(path: string, options?: HttpRequestOptions) => {
+      return request<T>('DELETE', path, undefined, options, true)
+    },
   },
 }
 
