@@ -90,7 +90,7 @@ const LibraryPage = () => {
               </span>
             }
           >
-            <MovieSection className='px-0 py-3 md:px-0' linkMovies={false} loading={loading} movies={watchedMovieItems} title='' />
+            <MovieSection className='px-0 py-3 md:px-0' linkMovies loading={loading} movies={watchedMovieItems} title='' />
           </Tab>
           <Tab
             key='favorites'
@@ -102,7 +102,7 @@ const LibraryPage = () => {
               </span>
             }
           >
-            <MovieSection className='px-0 py-3 md:px-0' linkMovies={false} loading={loading} movies={favoriteMovies} title='' />
+            <MovieSection className='px-0 py-3 md:px-0' linkMovies loading={loading} movies={favoriteMovies} title='' />
           </Tab>
         </Tabs>
       </section>

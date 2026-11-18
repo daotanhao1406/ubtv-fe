@@ -11,11 +11,12 @@ interface VideoPlayerProps {
   title?: string
   src: string
   poster?: string
+  onPlaybackStarted?: () => void
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, title }) => {
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, title, onPlaybackStarted }) => {
   return (
-    <MediaPlayer src={src} viewType='video' streamType='on-demand' logLevel='warn' crossOrigin playsInline title={title || 'Tên phim'} poster={poster || ''}>
+    <MediaPlayer src={src} viewType='video' streamType='on-demand' logLevel='warn' crossOrigin playsInline title={title || 'Movie'} poster={poster || ''} onPlaying={onPlaybackStarted}>
       <MediaProvider>
         <Poster className='vds-poster' />
       </MediaProvider>
