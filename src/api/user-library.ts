@@ -13,6 +13,12 @@ export interface FavoriteMutationData {
   isFavorite: boolean
 }
 
+export interface WatchedPlaybackData {
+  movieId: string
+  watchedAt: string
+  expiresAt: string
+}
+
 const getPage = (list: 'favorites' | 'watched', page: number, pageSize: number) => http.auth.get<UserLibraryPage>(`/users/me/library/${list}?page=${page}&pageSize=${pageSize}`)
 
 const getAllMovieIds = async (list: 'favorites' | 'watched') => {
@@ -28,6 +34,7 @@ const userLibraryApi = {
   getWatched: () => getAllMovieIds('watched'),
   addFavorite: (movieId: string) => http.auth.post<FavoriteMutationData>('/users/me/library/favorites', { movieId }),
   removeFavorite: (movieId: string) => http.auth.delete<FavoriteMutationData>(`/users/me/library/favorites?movieId=${encodeURIComponent(movieId)}`),
+  addWatched: (movieId: string) => http.auth.post<WatchedPlaybackData>('/users/me/library/watched', { movieId }),
 }
 
 export default userLibraryApi
