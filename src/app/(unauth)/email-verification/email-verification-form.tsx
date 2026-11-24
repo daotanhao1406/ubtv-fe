@@ -5,12 +5,12 @@ import { ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
-import { AuthHttpError } from '@/lib/auth-http'
+import { HttpError } from '@/lib/http'
 
 import { Button as ShadcnButton } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 
-import ubtvAuthApi from '@/api/ubtv-auth'
+import authApi from '@/api/auth'
 import { ResendVerificationInputSchema, VerifyEmailInputSchema, VerifyResetPasswordInputSchema } from '@/schema/auth-api.schema'
 
 const retryDelay = (value: string | null) => {
@@ -47,15 +47,15 @@ const EmailVerificationForm = ({ email, type, initialResendCooldown = 0 }: Email
   }, [countingDown])
 
   const showError = (error: unknown) => {
-    setInvalidCode(error instanceof AuthHttpError && [400, 401, 403, 410, 422].includes(error.status))
+    setInvalidCode(error instanceof HttpError && [400, 401, 403, 410, 422].includes(error.status))
     addToast({
       title: 'Verification failed',
-      description: error instanceof AuthHttpError ? error.message : typeof error === 'string' ? error : 'Unable to connect. Please try again.',
+      description: error instanceof HttpError ? error.message : typeof error === 'string' ? error : 'Unable to connect. Please try again.',
       color: 'danger',
       timeout: 5000,
       shouldShowTimeoutProgress: true,
     })
-    if (error instanceof AuthHttpError && error.status === 429) setRetryWait(retryDelay(error.retryAfter))
+    if (error instanceof HttpError && error.status === 429) setRetryWait(retryDelay(error.retryAfter))
   }
 
   const onInputOTPChange = async (value: string) => {
@@ -73,7 +73,7 @@ const EmailVerificationForm = ({ email, type, initialResendCooldown = 0 }: Email
         return
       }
       setPending(true)
-      await ubtvAuthApi
+      await authApi
         .verifyEmail(input.data)
         .then(() => {
           addToast({
@@ -95,7 +95,7 @@ const EmailVerificationForm = ({ email, type, initialResendCooldown = 0 }: Email
         return
       }
       setPending(true)
-      await ubtvAuthApi
+      await authApi
         .verifyResetPassword(input.data)
         .then(({ data }) => {
           if (!data.resetToken) throw new Error('Invalid response from authentication API')
@@ -126,9 +126,9 @@ const EmailVerificationForm = ({ email, type, initialResendCooldown = 0 }: Email
     setInvalidCode(false)
     try {
       if (type === 'register') {
-        await ubtvAuthApi.resendVerification(input.data)
+        await authApi.resendVerification(input.data)
       } else {
-        await ubtvAuthApi.forgotPassword(input.data)
+        await authApi.forgotPassword(input.data)
         setCode('')
       }
       setResendCooldown(60)

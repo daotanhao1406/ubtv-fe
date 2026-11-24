@@ -1,13 +1,13 @@
-import { AuthHttpError } from '@/lib/auth-http'
+import { setAccessToken, setUnauthorizedHandler } from '@/lib/http'
 
-import ubtvAuthApi from '@/api/ubtv-auth'
+import authApi from '@/api/auth'
 import type { LoginInput } from '@/schema/auth-api.schema'
 
 import type { AuthUser } from '@/types/auth'
 
-type SessionApi = Pick<typeof ubtvAuthApi, 'login' | 'refresh' | 'logout' | 'me'>
+type SessionApi = Pick<typeof authApi, 'login' | 'refresh' | 'logout' | 'me'>
 
-export const createAuthSession = (api: SessionApi = ubtvAuthApi) => {
+export const createAuthSession = (api: SessionApi = authApi) => {
   let accessToken: string | null = null
   let refreshRequest: Promise<AuthUser> | null = null
   let requestQueue = Promise.resolve()
@@ -29,6 +29,7 @@ export const createAuthSession = (api: SessionApi = ubtvAuthApi) => {
 
   const clearSession = () => {
     accessToken = null
+    setAccessToken(null)
     refreshAllowed = false
     sessionVersion++
   }
@@ -41,6 +42,7 @@ export const createAuthSession = (api: SessionApi = ubtvAuthApi) => {
       const { data } = await api.login(input)
       checkVersion(version)
       accessToken = data.accessToken
+      setAccessToken(accessToken)
       refreshAllowed = true
       return data.user
     })
@@ -55,6 +57,7 @@ export const createAuthSession = (api: SessionApi = ubtvAuthApi) => {
         const { data } = await api.refresh()
         checkVersion(version)
         accessToken = data.accessToken
+        setAccessToken(accessToken)
         return data.user
       })
         .catch((error: unknown) => {
@@ -81,24 +84,17 @@ export const createAuthSession = (api: SessionApi = ubtvAuthApi) => {
 
   const fetchMe = async (): Promise<AuthUser> => {
     const version = sessionVersion
-    for (let attempt = 0; attempt < 2; attempt++) {
-      const token = accessToken
-      if (!token) return refresh()
-      try {
-        const { data } = await api.me(token)
-        checkVersion(version)
-        return data
-      } catch (error) {
-        checkVersion(version)
-        if (!(error instanceof AuthHttpError) || error.status !== 401 || attempt === 1) {
-          clearSession()
-          throw error
-        }
-        if (token === accessToken) await refresh()
-        checkVersion(version)
-      }
+    if (!accessToken) return refresh()
+
+    try {
+      const { data } = await api.me()
+      checkVersion(version)
+      return data
+    } catch (error) {
+      checkVersion(version)
+      clearSession()
+      throw error
     }
-    throw new Error('Unable to load profile')
   }
 
   return { login, refresh, logout, fetchMe, clearSession }
@@ -108,6 +104,9 @@ let browserSession: ReturnType<typeof createAuthSession> | undefined
 
 export const getAuthSession = () => {
   if (typeof window === 'undefined') throw new Error('Authentication sessions must be initialized in the browser')
-  browserSession ??= createAuthSession()
+  if (!browserSession) {
+    browserSession = createAuthSession()
+    setUnauthorizedHandler(() => browserSession!.refresh())
+  }
   return browserSession
 }

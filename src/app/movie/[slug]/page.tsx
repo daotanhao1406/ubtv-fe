@@ -1,12 +1,12 @@
 import EpisodesList from '@/elements/movie/episodes-list'
 import MovieHero from '@/elements/movie/movie-hero'
 import MovieInformation from '@/elements/movie/movie-information'
-import { getMovie } from '@/services/movie.service'
+import { getMovieBySlug } from '@/services/movie.service'
 
 export default async function MovieDetailsPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 
-  const movie = await getMovie(slug)
+  const movie = await getMovieBySlug(slug)
 
   return (
     <div className='relative font-manrope'>

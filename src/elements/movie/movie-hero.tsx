@@ -1,13 +1,20 @@
 'use client'
 
+import { addToast } from '@heroui/react'
 import DOMPurify from 'dompurify'
-import { PlayIcon, Plus, ThumbsUp } from 'lucide-react'
+import { LoaderCircle, PlayIcon, Plus, ThumbsUp } from 'lucide-react'
 import Image from 'next/image'
+import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
+import { cn } from '@/lib/utils'
 import { useIsMobile } from '@/hooks'
 
 import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+
+import userLibraryApi from '@/api/user-library'
+import { useAuth } from '@/providers/AuthProvider'
 
 import { MovieItem } from '@/types/movie'
 
@@ -17,7 +24,14 @@ interface VideoSlideProps {
 
 export default function MovieHero({ movie }: VideoSlideProps) {
   const isMobile = useIsMobile()
+  const { user, isInitializing } = useAuth()
+  const router = useRouter()
+  const pathname = usePathname()
   const [safeHtml, setSafeHtml] = useState('')
+  const [isFavorite, setIsFavorite] = useState(false)
+  const [isFavoriteLoading, setIsFavoriteLoading] = useState(true)
+  const [isUpdatingFavorite, setIsUpdatingFavorite] = useState(false)
+  const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false)
 
   useEffect(() => {
     setSafeHtml(
@@ -27,6 +41,68 @@ export default function MovieHero({ movie }: VideoSlideProps) {
       }),
     )
   }, [movie.content])
+
+  useEffect(() => {
+    if (isInitializing) return
+
+    if (!user) {
+      setIsFavorite(false)
+      setIsFavoriteLoading(false)
+      return
+    }
+
+    let isCurrentRequest = true
+    setIsFavoriteLoading(true)
+
+    const loadFavoriteState = async () => {
+      try {
+        const favoriteIds = await userLibraryApi.getFavorites()
+        if (isCurrentRequest) setIsFavorite(favoriteIds.includes(movie._id))
+      } catch (error) {
+        if (!isCurrentRequest) return
+        addToast({
+          title: 'Unable to check favorite status',
+          description: error instanceof Error ? error.message : 'Please try again.',
+          color: 'danger',
+        })
+      } finally {
+        if (isCurrentRequest) setIsFavoriteLoading(false)
+      }
+    }
+
+    loadFavoriteState()
+    return () => {
+      isCurrentRequest = false
+    }
+  }, [isInitializing, movie._id, user])
+
+  const handleFavoritePress = async () => {
+    if (!user) {
+      setIsLoginDialogOpen(true)
+      return
+    }
+
+    if (isFavoriteLoading || isUpdatingFavorite) return
+
+    setIsUpdatingFavorite(true)
+    try {
+      const response = isFavorite ? await userLibraryApi.removeFavorite(movie._id) : await userLibraryApi.addFavorite(movie._id)
+      setIsFavorite(response.data.isFavorite)
+    } catch (error) {
+      addToast({
+        title: 'Unable to update favorite',
+        description: error instanceof Error ? error.message : 'Please try again.',
+        color: 'danger',
+      })
+    } finally {
+      setIsUpdatingFavorite(false)
+    }
+  }
+
+  const handleLoginRedirect = () => {
+    router.push(`/login?redirectFrom=${encodeURIComponent(pathname)}`)
+  }
+
   return (
     <div className='relative flex min-h-[80svh] w-full items-end overflow-hidden pt-24 font-manrope md:pt-28'>
       {/* Background Video */}
@@ -49,13 +125,35 @@ export default function MovieHero({ movie }: VideoSlideProps) {
               <Button size='icon' variant='outline'>
                 <Plus />
               </Button>
-              <Button size='icon' variant='outline'>
-                <ThumbsUp size={20} />
+              <Button
+                aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                aria-pressed={isFavorite}
+                className={cn(isFavorite && 'border-primary bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground')}
+                disabled={isInitializing || isFavoriteLoading || isUpdatingFavorite}
+                size='icon'
+                variant='outline'
+                onClick={handleFavoritePress}
+              >
+                {isFavoriteLoading || isUpdatingFavorite ? <LoaderCircle aria-hidden='true' className='animate-spin' size={20} /> : <ThumbsUp aria-hidden='true' className={cn(isFavorite && 'fill-current')} size={20} />}
               </Button>
             </div>
           </div>
         </div>
       </div>
+      <Dialog open={isLoginDialogOpen} onOpenChange={setIsLoginDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Sign in to add this movie to your favorites</DialogTitle>
+            <DialogDescription>Sign in to save this movie to your favorites list.</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant='outline' onClick={() => setIsLoginDialogOpen(false)}>
+              Maybe later
+            </Button>
+            <Button onClick={handleLoginRedirect}>Sign in</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

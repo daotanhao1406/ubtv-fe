@@ -14,8 +14,11 @@ import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/s
 
 import { docsConfig } from '@/constant/config/docs'
 import { siteConfig } from '@/constant/config/site'
+import { useAuth } from '@/providers/AuthProvider'
+
 export function MobileMenu() {
   const [open, setOpen] = React.useState(false)
+  const { user } = useAuth()
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -34,7 +37,8 @@ export function MobileMenu() {
           <div className='flex flex-col space-y-3'>
             {docsConfig.mainNav?.map(
               (item) =>
-                item.href && (
+                item.href &&
+                (item.href !== '/library' || user) && (
                   <MobileLink key={item.href} href={item.href} onOpenChange={setOpen}>
                     {item.title}
                   </MobileLink>

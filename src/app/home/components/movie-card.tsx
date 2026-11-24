@@ -2,14 +2,16 @@ import { Card } from '@heroui/react'
 import { Star } from 'lucide-react'
 import Image from 'next/image'
 
+import { cn } from '@/lib/utils'
+
 import { MovieItem } from '@/types/movie'
 
-export function MovieCard({ item }: { item: MovieItem }) {
+export function MovieCard({ item, isInteractive = true }: { item: MovieItem; isInteractive?: boolean }) {
   const imageSrc = item?.poster_url ? (item.poster_url.includes('http') ? item.poster_url : `https://phimimg.com/${item.poster_url}`) : null
 
   return (
     <Card
-      className='group relative aspect-[2/3] overflow-hidden rounded-lg transition-transform duration-300 cursor-pointer'
+      className={cn('group relative aspect-[2/3] overflow-hidden rounded-lg transition-transform duration-300', isInteractive && 'cursor-pointer')}
       // onMouseEnter={() => setIsHovering(true)}
       // onMouseLeave={() => setIsHovering(false)}
     >

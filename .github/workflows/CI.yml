@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [staging]
 
+env:
+  # Public build fixtures shared by both jobs; no live backend is required.
+  NEXT_PUBLIC_MOVIE_API: https://movies.example.test
+  NEXT_PUBLIC_API_ENDPOINT: https://backend.example.test
+
 jobs:
   build:
     strategy:
@@ -45,7 +50,7 @@ jobs:
           cache: 'npm'
       - run: npm ci
 
-      - name: Build Next.js for E2E tests
+      - name: Build Next.js
         run: npm run build
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}

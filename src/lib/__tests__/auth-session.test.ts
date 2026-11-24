@@ -1,7 +1,7 @@
 /** @jest-environment node */
 
-import { AuthHttpError } from '@/lib/auth-http'
 import { createAuthSession, getAuthSession } from '@/lib/auth-session'
+import { HttpError } from '@/lib/http'
 
 import type { ApiResponse } from '@/types/api'
 import type { AccessTokenData, AuthUser } from '@/types/auth'
@@ -12,7 +12,7 @@ const user: AuthUser = { id: 'user-1', name: 'User', email: 'user@example.com', 
 const credentials = { email: user.email, password: 'secret' }
 const envelope = <T>(data: T): ApiResponse<T> => ({ statusCode: 200, message: 'Success', data, timestamp: '2026-11-04T00:00:00Z' })
 const tokens = (accessToken = 'token-1', profile = user) => envelope({ accessToken, expiresIn: 900, user: profile })
-const httpError = (status: number, code?: string) => new AuthHttpError(status, { statusCode: status, message: 'Request failed', code })
+const httpError = (status: number, code?: string) => new HttpError(status, { statusCode: status, message: 'Request failed', code })
 const tick = () => new Promise<void>((resolve) => setImmediate(resolve))
 
 const deferred = <T>() => {

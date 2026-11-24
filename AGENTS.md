@@ -1,5 +1,9 @@
 # Repository instructions
 
+## Project language
+
+- Use English for all project development, including code identifiers, comments, documentation, commit messages, and user-facing text added or changed in the application.
+
 <!-- CODEGRAPH_START -->
 
 ## CodeGraph
@@ -18,6 +22,7 @@ If there is no `.codegraph/` directory, skip CodeGraph entirely — indexing is 
 - Never use `AbortSignal` or `AbortController` in project-owned frontend code anywhere in this repository.
 - Do not add, accept, or forward cancellation signals in HTTP clients, API functions, hooks, components, or event listeners.
 - When an async result is outdated, let the request finish and ignore its result using a simple state or version check instead of aborting it.
+- Do not prefix function calls with the `void` operator anywhere in the project; call the function directly.
 
 ## Frontend: UI testing
 
@@ -35,8 +40,18 @@ If there is no `.codegraph/` directory, skip CodeGraph entirely — indexing is 
 - Prefer `const Component = () => {}` and `const helper = () => {}` over ordinary function declarations for frontend components, hooks, and helpers.
 - Use async arrow functions and arrow-function properties in plain objects where applicable. Keep other function syntax only when required by its behavior or the language, such as class constructors.
 
+## Frontend: group component declarations
+
+- Organize variable and hook declarations near the top of each component into logical groups, with a blank line between groups.
+- Keep hook calls together in their own group, including custom hooks, context hooks, and router hooks.
+- Put state declarations after the hook group and group related state together by feature or purpose. Separate unrelated state groups with a blank line.
+- Keep a single blank line between groups; declarations that belong to the same group should stay together without blank lines between them.
+
 ## Frontend: reusable components receive props
 
+- Before creating a new UI component, inspect existing shared and feature components and reuse the closest fit. Extend an existing component with a small, typed option when it supports the new use case cleanly; avoid duplicating established UI such as movie lists rendered by `MovieSection`.
+- Create a new component only when no existing component fits or extending one would add inappropriate coupling or complexity.
+- Keep exactly one React component in each component file, and make that component the file's default export. Put every additional or helper component in its own file; non-component helpers, types, and constants may remain alongside the component when appropriate.
 - Read and normalize URL query parameters and route parameters in the page or parent container, then pass the required values to reusable components through explicit, typed props.
 - Do not duplicate the parent's URL parsing inside child components. Keep reusable forms and components independent of a particular page's URL structure.
 

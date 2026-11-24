@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
-import { AuthHttpError } from '@/lib/auth-http'
+import { HttpError } from '@/lib/http'
 
 import { Button as ShadcnButton } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
@@ -55,7 +55,7 @@ const ResetPasswordForm = ({ email, resetToken }: ResetPasswordFormProps) => {
         router.refresh()
       })
       .catch((error) => {
-        setErrorMessage(error instanceof AuthHttpError ? error.message : 'Unable to connect. Please try again.')
+        setErrorMessage(error instanceof HttpError ? error.message : 'Unable to connect. Please try again.')
       })
       .finally(() => {
         setLoading(false)

@@ -7,12 +7,12 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
-import { AuthHttpError } from '@/lib/auth-http'
+import { HttpError } from '@/lib/http'
 
 import { Button as ShadcnButton } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 
-import ubtvAuthApi from '@/api/ubtv-auth'
+import authApi from '@/api/auth'
 import { ForgotPasswordInput, ForgotPasswordInputSchema } from '@/schema/auth-api.schema'
 
 const ForgotPasswordForm = () => {
@@ -29,14 +29,14 @@ const ForgotPasswordForm = () => {
   const onSubmit = async (values: ForgotPasswordInput) => {
     if (loading) return
     setLoading(true)
-    await ubtvAuthApi
+    await authApi
       .forgotPassword(values)
       .then(() => {
         router.push(`/email-verification?${new URLSearchParams({ type: 'resetpassword', email: values.email, sent: 'true' })}`)
         router.refresh()
       })
       .catch((error) => {
-        addToast({ title: 'Unable to request a reset code', description: error instanceof AuthHttpError ? error.message : 'Unable to connect. Please try again.', color: 'danger' })
+        addToast({ title: 'Unable to request a reset code', description: error instanceof HttpError ? error.message : 'Unable to connect. Please try again.', color: 'danger' })
       })
       .finally(() => {
         setLoading(false)
